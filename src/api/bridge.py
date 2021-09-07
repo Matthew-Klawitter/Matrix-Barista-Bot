@@ -7,9 +7,12 @@ from nio import AsyncClient, UploadResponse
 
 
 class APIBridge:
-    async def send_message(self, client, room_id, message):
+    def __init__(self, client):
+        self.client = client
+
+    async def send_message(self, room_id, message):
         try:
-            await client.room_send(
+            await self.client.room_send(
                 room_id=room_id,
                 message_type="m.room.message",
                 content={
@@ -22,7 +25,7 @@ class APIBridge:
         except Exception:
             print("Failed to send message.")
 
-    async def send_image(self, client, room_id, image):
+    async def send_image(self, room_id, image):
         mime_type = magic.from_file(image, mime=True)  # e.g. "image/jpeg"
         if not mime_type.startswith("image/"):
             print("Drop message because file does not have an image mime type.")
@@ -59,7 +62,7 @@ class APIBridge:
         }
 
         try:
-            await client.room_send(
+            await self.client.room_send(
                 room_id,
                 message_type="m.room.message",
                 content=content
