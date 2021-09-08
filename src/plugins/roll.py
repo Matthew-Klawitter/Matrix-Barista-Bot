@@ -1,6 +1,55 @@
 import random
 import re
 
+
+"""
+Main Plugin class that manages command usage
+"""
+
+
+class DicePlugin:
+    async def task(self, command):
+        if command.prefix == "r" or command.prefix == "roll":
+            await command.bridge.send_message(command.chatroom_id, await self.roll_dice(command))
+
+    async def get_commands(self):
+        return {"r", "roll"}
+
+    async def get_name(self):
+        return "Roll"
+
+    async def get_help(self):
+        return "/roll <dice_expression>\n"
+
+    async def roll_dice(self, command):
+        rolls = []
+        constant = []
+        parts = command.args.split("+")
+        for part in parts:
+            if "-" in part:
+                try:
+                    index = part.index("-", 1)
+                    new_part = part[index:]
+                    part = part[:index]
+                    parts.append(new_part)
+                except:
+                    pass  # part is just a plain negative number
+            part = part.strip()
+            if re.search("\d+[dD]\d+", part):
+                rolls.append(Roll(part))
+            elif part.replace("-", "", 1).isdigit():
+                constant.append(int(part))
+        result = "Rolled:"
+        total = 0
+        for roll in rolls:
+            total += roll.sum()
+            result += "\n(" + ", ".join(str(s) for s in roll.rolls) + ") = " + str(roll.sum())
+        for c in constant:
+            total += c
+            result += "\n + " + str(c)
+        result += "\n = " + str(total)
+        return result
+
 """
 Class for handling dice rolls
 """
@@ -36,50 +85,3 @@ class Roll():
 
     def sum(self):
         return sum(self.rolls)
-"""
-Main Plugin class that manages command usage
-"""
-
-
-class DicePlugin:
-    def on_command(self, command, api):
-        if command.command == "r" or command.command == "roll":
-            return {"type": "message", "message": self.roll_dice(command)}
-
-    def get_commands(self):
-        return {"r", "roll"}
-
-    def get_name(self):
-        return "Roll"
-
-    def get_help(self):
-        return "/roll <dice_expression>\n"
-
-    def roll_dice(self, command):
-        rolls = []
-        constant = []
-        parts = command.args.split("+")
-        for part in parts:
-            if "-" in part:
-                try:
-                    index = part.index("-", 1)
-                    new_part = part[index:]
-                    part = part[:index]
-                    parts.append(new_part)
-                except:
-                    pass  # part is just a plain negative number
-            part = part.strip()
-            if re.search("\d+[dD]\d+", part):
-                rolls.append(Roll(part))
-            elif part.replace("-", "", 1).isdigit():
-                constant.append(int(part))
-        result = "Rolled:"
-        total = 0
-        for roll in rolls:
-            total += roll.sum()
-            result += "\n(" + ", ".join(str(s) for s in roll.rolls) + ") = " + str(roll.sum())
-        for c in constant:
-            total += c
-            result += "\n + " + str(c)
-        result += "\n = " + str(total)
-        return result

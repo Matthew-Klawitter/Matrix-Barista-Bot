@@ -14,6 +14,7 @@ from nio import AsyncClient, LoginResponse, MatrixRoom, RoomMessageText
 
 from src.api.bridge import APIBridge
 from src.api.data_objects import Command
+from src.plugins.plugin_manager import PluginManager
 from src.services.mumble_alerts import MumbleAlerts
 
 CONFIG_FILE = "credentials.json"
@@ -107,8 +108,11 @@ async def main() -> None:
         print("Pre-initialization is complete!")
 
         '''
-        Plugin Manager
+        Plugin Manager handles plugin initialization and mapping commands
+        to their associated objects.
         '''
+        plugin_manager = PluginManager()
+        await plugin_manager.map_commands()
 
         '''
         The periodic loop handles services that should be run periodically.
