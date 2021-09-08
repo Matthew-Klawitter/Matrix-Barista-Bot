@@ -5,6 +5,8 @@ import os
 import socket
 import sys
 import getpass
+import threading
+from asyncore import loop
 from struct import pack, unpack
 from time import sleep
 
@@ -12,6 +14,7 @@ from nio import AsyncClient, LoginResponse, MatrixRoom, RoomMessageText
 
 from src.api.bridge import APIBridge
 from src.api.data_objects import Command
+from src.services.mumble_alerts import MumbleAlerts
 
 CONFIG_FILE = "credentials.json"
 
@@ -43,64 +46,13 @@ async def message_callback(room: MatrixRoom, event: RoomMessageText) -> None:
     prefix = event.body.split(" ")[0]
     command = Command(prefix, room.user_name(event.sender), room.room_id, room.display_name, event.body)
 
-async def connected_users(host="localhost", port=64738):
-    """
-        <host> [<port>]
-        Ping the server and display results.
-    """
 
-    try:
-        addrinfo = socket.getaddrinfo(host, port, 0, 0, socket.SOL_UDP)
-    except socket.gaierror as e:
-        print(e)
-        return
+async def periodic(services, timeout):
+    while True:
+        for s in services:
+            await s.task()
+        await asyncio.sleep(timeout)
 
-    for (family, socktype, proto, canonname, sockaddr) in addrinfo:
-        s = socket.socket(family, socktype, proto=proto)
-        s.settimeout(2)
-
-        buf = pack(">iQ", 0, datetime.datetime.now().microsecond)
-        try:
-            s.sendto(buf, sockaddr)
-        except (socket.gaierror, socket.timeout) as e:
-            continue
-
-        try:
-            data, addr = s.recvfrom(1024)
-        except socket.timeout:
-            continue
-
-        r = unpack(">bbbbQiii", data)
-
-        # version = r[1:4]
-        # https://wiki.mumble.info/wiki/Protocol
-        # r[0,1,2,3] = version
-        # r[4] = ts (indent value)
-        # r[5] = users
-        # r[6] = max users
-        # r[7] = bandwidth
-
-        return r[5]
-
-async def return_status(current_users, api, room):
-    updated_users = await connected_users()
-    new_current = current_users
-
-    if updated_users != current_users:
-        message = ""
-
-        if current_users < updated_users:
-            message = "A user has joined the mumble server. There are now " + str(
-                updated_users) + " connected."
-            new_current = updated_users
-        elif current_users > updated_users:
-            message = "A user has left the mumble server. There are now " + str(
-                updated_users) + " connected."
-            new_current = updated_users
-
-        await api.send_message(room, message)
-    sleep(1)
-    return new_current
 
 async def main() -> None:
     # If there are no previously-saved credentials, we'll use the password
@@ -150,21 +102,36 @@ async def main() -> None:
             client.device_id = config['device_id']
 
         room = config['default_room']
-
         bridge = APIBridge(client)
 
-        current_users = await connected_users()
+        print("Pre-initialization is complete!")
 
-        while True:
-            current_users = await return_status(current_users, bridge, room)
+        '''
+        Plugin Manager
+        '''
 
-        # Run a one time sync to ignore old messages
-        await client.sync(timeout=10000, full_state=True)
+        '''
+        The periodic loop handles services that should be run periodically.
+        This would include such things as plugins that must be run once
+        every second.
+        '''
+        services = [MumbleAlerts(bridge, room)]
+        periodic_loop = asyncio.create_task(periodic(services, 1))
+        print("Periodic service initialization is complete!")
+
+        '''
+        A set of callbacks intended to handle responding to user inputs.
+        A plugin effectively registers a set of commands, and in these
+        callbacks the bot will be looking for one of those sets to
+        issue an appropriate response.
+        '''
+        print("Syncing messaging and callbacks with Matrix Synapse... Should be all set to pour!")
+        await client.sync(timeout=10000, full_state=True)  # Sync once to omit old messages
         client.add_event_callback(message_callback, RoomMessageText)
         await client.sync_forever(timeout=30000)
 
-    # Either way we're logged in here, too
+    # logout after finishing execution
     await client.close()
 
-
+print("MatrixBaristaBot is brewing up...")
 asyncio.get_event_loop().run_until_complete(main())
