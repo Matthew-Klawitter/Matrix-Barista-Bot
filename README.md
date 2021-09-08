@@ -12,3 +12,4 @@ Current aim is to redesign under a more optimized and responsive architecture as
 ## Features
 Currently features include:
 1. MumbleAlerts - Periodic alerts that respond when the user count to a mumble server changes
+2. RollPlugin - Simulate dice rolls by typing "!r #d#" where the first number is the number of dice, and the second the number of sides. Append "+#" or "-#" to apply a positive or negative modifier to each roll.
