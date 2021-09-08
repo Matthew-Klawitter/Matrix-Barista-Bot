@@ -6,9 +6,9 @@ import sys
 
 from nio import AsyncClient, LoginResponse, RoomMessageText
 
-from src.api.bridge import APIBridge
-from src.plugins.plugin_manager import PluginManager
-from src.services.mumble_alerts import MumbleAlerts
+from api.bridge import APIBridge
+from plugins.plugin_manager import PluginManager
+from services.mumble_alerts import MumbleAlerts
 
 CONFIG_FILE = "credentials.json"
 

@@ -1,7 +1,7 @@
 from nio import MatrixRoom, RoomMessageText
 
-from src.api.data_objects import Command
-from src.plugins.roll import DicePlugin
+from api.data_objects import Command
+from plugins.roll import DicePlugin
 
 
 class PluginManager:
