@@ -21,7 +21,6 @@ class APIBridge:
                 }
             )
 
-            print("Message successfully sent.")
         except Exception:
             print("Failed to send message.")
 

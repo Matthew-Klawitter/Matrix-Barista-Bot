@@ -1,19 +1,12 @@
 import asyncio
-import datetime
+import getpass
 import json
 import os
-import socket
 import sys
-import getpass
-import threading
-from asyncore import loop
-from struct import pack, unpack
-from time import sleep
 
-from nio import AsyncClient, LoginResponse, MatrixRoom, RoomMessageText
+from nio import AsyncClient, LoginResponse, RoomMessageText
 
 from src.api.bridge import APIBridge
-from src.api.data_objects import Command
 from src.plugins.plugin_manager import PluginManager
 from src.services.mumble_alerts import MumbleAlerts
 
@@ -41,11 +34,6 @@ def write_details_to_disk(resp: LoginResponse, homeserver, defaultroom) -> None:
             },
             f
         )
-
-
-async def message_callback(room: MatrixRoom, event: RoomMessageText) -> None:
-    prefix = event.body.split(" ")[0]
-    command = Command(prefix, room.user_name(event.sender), room.room_id, room.display_name, event.body)
 
 
 async def periodic(services, timeout):
@@ -111,7 +99,7 @@ async def main() -> None:
         Plugin Manager handles plugin initialization and mapping commands
         to their associated objects.
         '''
-        plugin_manager = PluginManager()
+        plugin_manager = PluginManager(bridge)
         await plugin_manager.map_commands()
 
         '''
@@ -130,9 +118,10 @@ async def main() -> None:
         issue an appropriate response.
         '''
         print("Syncing messaging and callbacks with Matrix Synapse... Should be all set to pour!")
-        await client.sync(timeout=10000, full_state=True)  # Sync once to omit old messages
-        client.add_event_callback(message_callback, RoomMessageText)
-        await client.sync_forever(timeout=30000)
+        await client.sync(timeout=0, full_state=True)  # Sync once to omit old messages
+        print("Done with initial sync")
+        client.add_event_callback(plugin_manager.message, RoomMessageText)
+        await client.sync_forever(timeout=1000)
 
     # logout after finishing execution
     await client.close()

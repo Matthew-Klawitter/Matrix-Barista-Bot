@@ -9,11 +9,11 @@ Main Plugin class that manages command usage
 
 class DicePlugin:
     async def task(self, command):
-        if command.prefix == "r" or command.prefix == "roll":
+        if command.prefix == "!r" or command.prefix == "!roll":
             await command.bridge.send_message(command.chatroom_id, await self.roll_dice(command))
 
     async def get_commands(self):
-        return {"r", "roll"}
+        return {"!r", "!roll"}
 
     async def get_name(self):
         return "Roll"

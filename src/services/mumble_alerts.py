@@ -55,7 +55,7 @@ class MumbleAlerts:
 
             return r[5]
 
-    async def return_status(self, current_users, api, room):
+    async def return_status(self, current_users, bridge, room):
         updated_users = await self.connected_users()
         new_current = current_users
 
@@ -71,6 +71,5 @@ class MumbleAlerts:
                     updated_users) + " connected."
                 new_current = updated_users
 
-            await api.send_message(room, message)
-        sleep(1)
+            await bridge.send_message(room, message)
         return new_current
