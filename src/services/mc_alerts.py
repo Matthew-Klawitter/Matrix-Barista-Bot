@@ -6,7 +6,7 @@ class MCAlerts:
         self.bridge = bridge
         self.room = room
         self.players = {}
-        self.server = MinecraftServer("localhost", 25565)
+        self.server = MinecraftServer("mc.seafarers.cafe", 25565)
 
     async def task(self):
         status = self.server.status()
