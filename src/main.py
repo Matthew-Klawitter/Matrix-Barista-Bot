@@ -10,7 +10,7 @@ from api.bridge import APIBridge
 from plugins.plugin_manager import PluginManager
 # from services.mumble_alerts import MumbleAlerts
 from services.mumble_log import MumbleAlerts
-from services.mc_alerts import MCAlerts
+# from services.mc_alerts import MCAlerts
 CONFIG_FILE = "credentials.json"
 
 
@@ -108,7 +108,7 @@ async def main() -> None:
         This would include such things as plugins that must be run once
         every second.
         '''
-        services = [MumbleAlerts(bridge, room), MCAlerts(bridge, room)]
+        services = [MumbleAlerts(bridge, room)] #, MCAlerts(bridge, room)]
         periodic_loop = asyncio.create_task(periodic(services, 1))
         print("Periodic service initialization is complete!")
 
