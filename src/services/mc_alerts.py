@@ -18,7 +18,7 @@ class MCAlerts:
                     message = "Minecraft Server - connected users:\n"
 
                     for p in status.players.sample:
-                        message += "{}\t".format(p.name)
+                        message += "{}, ".format(p.name)
 
                     await self.bridge.send_message(self.room, message)
             else:
