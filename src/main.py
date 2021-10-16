@@ -7,7 +7,7 @@ import sys
 from nio import AsyncClient, LoginResponse, RoomMessageText
 
 from api.bridge import APIBridge
-from plugins.plugin_manager import PluginManager
+from plugin_manager import PluginManager
 # from services.mumble_alerts import MumbleAlerts
 from services.mumble_log import MumbleAlerts
 # from services.mc_alerts import MCAlerts
@@ -101,7 +101,6 @@ async def main() -> None:
         to their associated objects.
         '''
         plugin_manager = PluginManager(bridge)
-        await plugin_manager.map_commands()
 
         '''
         The periodic loop handles services that should be run periodically.
@@ -121,7 +120,7 @@ async def main() -> None:
         print("Syncing messaging and callbacks with Matrix Synapse... Should be all set to pour!")
         await client.sync(timeout=0, full_state=True)  # Sync once to omit old messages
         print("Done with initial sync")
-        client.add_event_callback(plugin_manager.message, RoomMessageText)
+        client.add_event_callback(plugin_manager.message_callback, RoomMessageText)
         await client.sync_forever(timeout=1000)
 
     # logout after finishing execution

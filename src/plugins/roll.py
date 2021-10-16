@@ -8,23 +8,22 @@ Main Plugin class that manages command usage
 
 
 class DicePlugin:
-    async def task(self, command):
-        if command.prefix == "!r" or command.prefix == "!roll":
-            await command.bridge.send_message(command.chatroom_id, await self.roll_dice(command))
+    async def task(self, message):
+        await message.bridge.send_message(message.chatroom_id, self.roll_dice(message))
 
-    async def get_commands(self):
-        return {"!r", "!roll"}
+    def get_commands(self):
+        return {"r": self.task, "roll": self.task}
 
-    async def get_name(self):
+    def get_name(self):
         return "Roll"
 
-    async def get_help(self):
+    def get_help(self):
         return "/roll <dice_expression>\n"
 
-    async def roll_dice(self, command):
+    def roll_dice(self, message):
         rolls = []
         constant = []
-        parts = command.args.split("+")
+        parts = message.args.split("+")
         for part in parts:
             if "-" in part:
                 try:
