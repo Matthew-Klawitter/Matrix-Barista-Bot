@@ -11,3 +11,9 @@ install: .venv olm
 
 olm:
 	git clone https://gitlab.matrix.org/matrix-org/olm.git
+
+build:
+	docker build . -t matrix_bot
+
+docker_run:
+	docker run --rm -i -t matrix_bot:latest
