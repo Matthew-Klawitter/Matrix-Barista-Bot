@@ -26,12 +26,14 @@ class MumbleAlerts:
                         if m:
                             date = self.format_date_str(m[1])
                             if date > self.last_update:
+                                self.last_update = date
                                 name = m[2]
                                 if "Authenticated" in line:
                                     action = "connected to"
                                 elif "Connection closed" in line:
                                     action = "disconnected from"
-                                self.last_update = date
+                                else:
+                                    continue
                                 await self.bridge.send_message(self.room, f"{name} {action} mumble.")
         except FileNotFoundError:
             pass
