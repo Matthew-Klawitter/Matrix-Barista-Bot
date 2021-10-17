@@ -1,0 +1,12 @@
+version: "3"
+services:
+  matrix-bot:
+    image: matrix_bot:latest
+    container_name: matrix_bot
+    volumes:
+      - ./nio_store/:/nio_store
+      - ./src/:/src
+    command: python3 -m http.server
+volumes:
+  src:
+  nio_store:
