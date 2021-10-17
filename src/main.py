@@ -85,7 +85,7 @@ class CustomEncryptedClient(AsyncClient):
         if store_path and not os.path.isdir(store_path):
             os.mkdir(store_path)
         self.default_room = default_room
-        self.add_event_callback(self.cb_autojoin_room, InviteEvent)
+#        self.add_event_callback(self.cb_autojoin_room, InviteEvent)
 
     def trust_devices(self) -> None:
         room_devices = self.room_devices(self.default_room)
@@ -95,10 +95,10 @@ class CustomEncryptedClient(AsyncClient):
                 self.verify_device(room_devices[user][device])
                 print(f"Verifying device {device} for {user}")
 
-    def cb_autojoin_room(self, room: MatrixRoom, event: InviteEvent):
-        self.join(room.room_id)
-        room = self.rooms[ROOM_ID]
-        print(f"Room {room.name} is encrypted: {room.encrypted}" )
+#    def cb_autojoin_room(self, room: MatrixRoom, event: InviteEvent):
+#        self.join(room.room_id)
+#        room = self.rooms[ROOM_ID]
+#        print(f"Room {room.name} is encrypted: {room.encrypted}" )
 
 
 async def run_client(client: CustomEncryptedClient) -> None:
