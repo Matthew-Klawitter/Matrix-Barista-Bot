@@ -143,3 +143,4 @@ src/credentials.json
 olm/
 .venv
 credentials.json
+nio_store/
