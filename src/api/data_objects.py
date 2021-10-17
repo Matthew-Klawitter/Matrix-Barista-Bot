@@ -1,8 +1,8 @@
 class Message:
     def __init__(self, bridge, room, event):
         self.username = room.user_name(event.sender)
-        self.chatroom_id = room.room_id
-        self.chatroom = room.display_name
+        self.room_id = room.room_id
+        self.room_name = room.display_name
         self.bridge = bridge
         self.message = event.body
         self.is_command = event.body.startswith("!")
