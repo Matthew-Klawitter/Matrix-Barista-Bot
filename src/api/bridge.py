@@ -1,3 +1,4 @@
+import bs4 as bs
 import os
 from PIL import Image
 import aiofiles.os
@@ -20,6 +21,31 @@ class APIBridge:
                 content={
                     "msgtype": "m.text",
                     "body": message
+                }
+            )
+
+        except Exception:
+            print("Failed to send message.")
+
+    async def send_html(self, room_id, message):
+        try:
+            limit = 1000000
+
+            soup = bs.BeautifulSoup(message, "html.parser")
+            for data in soup(['style', 'script']):
+                data.decompose()
+            clean_message = ' '.join(soup.stripped_strings)
+
+            if len(message) > limit:
+                message = f"{message[:limit]} [truncated]"
+            await self.client.room_send(
+                room_id=room_id,
+                message_type="m.room.message",
+                content={
+                    "msgtype": "m.text",
+                    "body": clean_message,
+                    "format": "org.matrix.custom.html",
+                    "formatted_body": message
                 }
             )
 

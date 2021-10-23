@@ -3,6 +3,8 @@ import bs4 as bs
 import re
 import urllib.request
 import nltk
+nltk.download('punkt')
+nltk.download('stopwords')
 
 import requests
 from lxml.html import fromstring
@@ -24,8 +26,8 @@ class PreviewPlugin:
             tree = fromstring(r.content)
             title = tree.findtext('.//title')
             summary = self.get_summary(url)
-            response = "{}\n\n{}".format(title, summary)
-            await message.bridge.send_message(message.room_id, response)
+            response = "<b>{}</b>\n\n{}".format(title, summary)
+            await message.bridge.send_html(message.room_id, response)
 
     def get_summary(self, url):
         scraped_article = urllib.request.urlopen(url)
@@ -74,5 +76,9 @@ class PreviewPlugin:
 
         summary_sentences = heapq.nlargest(5, sentence_scores, key=sentence_scores.get)
 
+        pre = "<blockquote>"
+        post = "</blockquote>"
         summary = ' '.join(summary_sentences)
-        return summary
+        
+        result = pre + summary + post
+        return result
