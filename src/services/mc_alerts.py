@@ -1,5 +1,8 @@
 from mcstatus import MinecraftServer
 
+import logging
+
+LOG = logging.getLogger(__name__)
 
 class MCAlerts:
     def __init__(self, bridge, room):
@@ -20,10 +23,10 @@ class MCAlerts:
                     for p in status.players.sample:
                         message += "{}, ".format(p.name)
 
-                    await self.bridge.send_message(self.room, message)
+                    await self.bridge.send_message(self.room, text=message)
             else:
                 if self.players > 0:
                     self.players = 0
-                    await self.bridge.send_message(self.room, "Minecraft Server - no connected users detected.")
+                    await self.bridge.send_message(self.room, text="Minecraft Server - no connected users detected.")
         except Exception as e:
-            print(e)
+            LOG.error(e)

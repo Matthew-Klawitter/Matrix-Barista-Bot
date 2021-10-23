@@ -9,7 +9,7 @@ Main Plugin class that manages command usage
 
 class DicePlugin:
     async def task(self, message):
-        await message.bridge.send_message(message.room_id, self.roll_dice(message))
+        await message.bridge.send_message(message.room_id, text=self.roll_dice(message))
 
     def get_commands(self):
         return {"r": self.task, "roll": self.task}

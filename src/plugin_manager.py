@@ -3,12 +3,13 @@ from nio import MatrixRoom, RoomMessageText
 from api.data_objects import Message
 from plugins.roll import DicePlugin
 from plugins.preview import PreviewPlugin
+from plugins.celebrate import CelebratePlugin
 
 
 class PluginManager:
     def __init__(self, bridge):
         self.bridge = bridge
-        self.plugins = [DicePlugin(), PreviewPlugin()]
+        self.plugins = [DicePlugin(), PreviewPlugin(), CelebratePlugin()]
         self.commands = {}
         self.message_listeners = []
         for p in self.plugins:

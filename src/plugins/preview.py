@@ -9,6 +9,10 @@ nltk.download('stopwords')
 import requests
 from lxml.html import fromstring
 
+import logging
+
+LOG = logging.getLogger(__name__)
+
 class PreviewPlugin:
     def get_commands(self):
         return {}
@@ -27,7 +31,7 @@ class PreviewPlugin:
             title = tree.findtext('.//title')
             summary = self.get_summary(url)
             response = "<b>{}</b>\n\n{}".format(title, summary)
-            await message.bridge.send_html(message.room_id, response)
+            await message.bridge.send_message(message.room_id, html=response)
 
     def get_summary(self, url):
         try:
@@ -80,9 +84,9 @@ class PreviewPlugin:
             pre = "<blockquote>"
             post = "</blockquote>"
             summary = ' '.join(summary_sentences)
-            
+
             result = pre + summary + post
             return result
         except ValueError as e:
-            print(e)
+            LOG.error(e)
             return "<blockquote>No summary available</blockquote>"

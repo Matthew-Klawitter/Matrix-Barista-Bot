@@ -6,6 +6,9 @@ from time import sleep
 
 import datetime
 import re
+import logging
+
+LOG = logging.getLogger(__name__)
 
 class MumbleAlerts:
     def __init__(self, bridge, room):
@@ -34,11 +37,11 @@ class MumbleAlerts:
                                     action = "disconnected from"
                                 else:
                                     continue
-                                await self.bridge.send_message(self.room, f"{name} {action} mumble.")
+                                await self.bridge.send_message(self.room, text=f"{name} {action} mumble.")
         except FileNotFoundError:
             pass
         except Exception as e:
-            print(e)
+            LOG.error(e)
 
     def format_date_str(self, stng):
         f = "%Y-%m-%d %H:%M:%S.%f"

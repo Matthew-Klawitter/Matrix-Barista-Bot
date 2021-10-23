@@ -6,56 +6,50 @@ import magic
 
 from nio import UploadResponse
 
+import logging
+
+LOG = logging.getLogger(__name__)
+
 class APIBridge:
     def __init__(self, client):
         self.client = client
 
-    async def send_message(self, room_id, message):
+    def limit_message(self, message):
+        limit = 1000000
+        if len(message) > limit:
+            return f"{message[:limit]} [truncated]"
+        return message
+
+    def html_to_text(self, message):
+        soup = bs.BeautifulSoup(message, "html.parser")
+        for data in soup(['style', 'script']):
+            data.decompose()
+        return ' '.join(soup.stripped_strings)
+
+    async def send_message(self, room_id, text=None, html=None, msg_type="m.text"):
+        content = {}
+        if html:
+            html = self.limit_message(html)
+            text = self.html_to_text(html)
+            content["format"] = "org.matrix.custom.html"
+            content["formatted_body"] = html
+        if text:
+            text = self.limit_message(text)
+        content["msgtype"] = msg_type
+        content["body"] = text
         try:
-            limit = 1000000
-            if len(message) > limit:
-                message = f"{message[:limit]} [truncated]"
             await self.client.room_send(
                 room_id=room_id,
                 message_type="m.room.message",
-                content={
-                    "msgtype": "m.text",
-                    "body": message
-                }
+                content=content
             )
-
         except Exception:
-            print("Failed to send message.")
-
-    async def send_html(self, room_id, message):
-        try:
-            limit = 1000000
-
-            soup = bs.BeautifulSoup(message, "html.parser")
-            for data in soup(['style', 'script']):
-                data.decompose()
-            clean_message = ' '.join(soup.stripped_strings)
-
-            if len(message) > limit:
-                message = f"{message[:limit]} [truncated]"
-            await self.client.room_send(
-                room_id=room_id,
-                message_type="m.room.message",
-                content={
-                    "msgtype": "m.text",
-                    "body": clean_message,
-                    "format": "org.matrix.custom.html",
-                    "formatted_body": message
-                }
-            )
-
-        except Exception:
-            print("Failed to send message.")
+            LOG.error("Failed to send message.")
 
     async def send_image(self, room_id, image):
         mime_type = magic.from_file(image, mime=True)  # e.g. "image/jpeg"
         if not mime_type.startswith("image/"):
-            print("Drop message because file does not have an image mime type.")
+            LOG.error("Drop message because file does not have an image mime type.")
             return
 
         im = Image.open(image)
@@ -70,9 +64,9 @@ class APIBridge:
                 filename=os.path.basename(image),
                 filesize=file_stat.st_size)
         if isinstance(resp, UploadResponse):
-            print("Image was uploaded successfully to server. ")
+            LOG.error("Image was uploaded successfully to server. ")
         else:
-            print(f"Failed to upload image. Failure response: {resp}")
+            LOG.error(f"Failed to upload image. Failure response: {resp}")
 
         content = {
             "body": os.path.basename(image),  # descriptive title
@@ -94,6 +88,6 @@ class APIBridge:
                 message_type="m.room.message",
                 content=content
             )
-            print("Image was sent successfully")
+            LOG.info("Image was sent successfully")
         except Exception:
-            print(f"Image send of file {image} failed.")
+            LOG.error(f"Image send of file {image} failed.")

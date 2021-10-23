@@ -71,5 +71,5 @@ class MumbleAlerts:
                     updated_users) + " connected."
                 new_current = updated_users
 
-            await bridge.send_message(room, message)
+            await bridge.send_message(room, text=message)
         return new_current
