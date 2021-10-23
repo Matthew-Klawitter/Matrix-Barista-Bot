@@ -6,7 +6,6 @@ services:
     volumes:
       - ./nio_store/:/nio_store
       - ./src/:/src
-    command: python3 -m http.server
 volumes:
   src:
   nio_store:

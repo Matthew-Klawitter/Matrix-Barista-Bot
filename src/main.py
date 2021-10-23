@@ -140,6 +140,7 @@ async def main():
         await client.close()
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     try:
         asyncio.run(
             main()

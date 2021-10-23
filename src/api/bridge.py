@@ -6,6 +6,10 @@ import magic
 
 from nio import UploadResponse
 
+import logging
+
+LOG = logging.getLogger(__name__)
+
 class APIBridge:
     def __init__(self, client):
         self.client = client
@@ -25,7 +29,7 @@ class APIBridge:
             )
 
         except Exception:
-            print("Failed to send message.")
+            LOG.error("Failed to send message.")
 
     async def send_html(self, room_id, message):
         try:
@@ -50,12 +54,12 @@ class APIBridge:
             )
 
         except Exception:
-            print("Failed to send message.")
+            LOG.error("Failed to send message.")
 
     async def send_image(self, room_id, image):
         mime_type = magic.from_file(image, mime=True)  # e.g. "image/jpeg"
         if not mime_type.startswith("image/"):
-            print("Drop message because file does not have an image mime type.")
+            LOG.error("Drop message because file does not have an image mime type.")
             return
 
         im = Image.open(image)
@@ -70,9 +74,9 @@ class APIBridge:
                 filename=os.path.basename(image),
                 filesize=file_stat.st_size)
         if isinstance(resp, UploadResponse):
-            print("Image was uploaded successfully to server. ")
+            LOG.error("Image was uploaded successfully to server. ")
         else:
-            print(f"Failed to upload image. Failure response: {resp}")
+            LOG.error(f"Failed to upload image. Failure response: {resp}")
 
         content = {
             "body": os.path.basename(image),  # descriptive title
@@ -94,6 +98,6 @@ class APIBridge:
                 message_type="m.room.message",
                 content=content
             )
-            print("Image was sent successfully")
+            LOG.info("Image was sent successfully")
         except Exception:
-            print(f"Image send of file {image} failed.")
+            LOG.error(f"Image send of file {image} failed.")

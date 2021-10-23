@@ -9,6 +9,10 @@ nltk.download('stopwords')
 import requests
 from lxml.html import fromstring
 
+import logging
+
+LOG = logging.getLogger(__name__)
+
 class PreviewPlugin:
     def get_commands(self):
         return {}
@@ -80,9 +84,9 @@ class PreviewPlugin:
             pre = "<blockquote>"
             post = "</blockquote>"
             summary = ' '.join(summary_sentences)
-            
+
             result = pre + summary + post
             return result
         except ValueError as e:
-            print(e)
+            LOG.error(e)
             return "<blockquote>No summary available</blockquote>"
