@@ -37,7 +37,7 @@ class MumbleAlerts:
                                     action = "disconnected from"
                                 else:
                                     continue
-                                await self.bridge.send_message(self.room, f"{name} {action} mumble.")
+                                await self.bridge.send_message(self.room, text=f"{name} {action} mumble.")
         except FileNotFoundError:
             pass
         except Exception as e:

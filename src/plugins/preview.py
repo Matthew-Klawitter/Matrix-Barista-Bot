@@ -31,7 +31,7 @@ class PreviewPlugin:
             title = tree.findtext('.//title')
             summary = self.get_summary(url)
             response = "<b>{}</b>\n\n{}".format(title, summary)
-            await message.bridge.send_html(message.room_id, response)
+            await message.bridge.send_message(message.room_id, html=response)
 
     def get_summary(self, url):
         try:

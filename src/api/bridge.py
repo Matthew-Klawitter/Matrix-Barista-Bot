@@ -14,45 +14,35 @@ class APIBridge:
     def __init__(self, client):
         self.client = client
 
-    async def send_message(self, room_id, message):
+    def limit_message(self, message):
+        limit = 1000000
+        if len(message) > limit:
+            return f"{message[:limit]} [truncated]"
+        return message
+
+    def html_to_text(self, message):
+        soup = bs.BeautifulSoup(message, "html.parser")
+        for data in soup(['style', 'script']):
+            data.decompose()
+        return ' '.join(soup.stripped_strings)
+
+    async def send_message(self, room_id, text=None, html=None, msg_type="m.text"):
+        content = {}
+        if html:
+            html = self.limit_message(html)
+            text = self.html_to_text(html)
+            content["format"] = "org.matrix.custom.html"
+            content["formatted_body"] = html
+        if text:
+            text = self.limit_message(text)
+        content["msgtype"] = msg_type
+        content["body"] = text
         try:
-            limit = 1000000
-            if len(message) > limit:
-                message = f"{message[:limit]} [truncated]"
             await self.client.room_send(
                 room_id=room_id,
                 message_type="m.room.message",
-                content={
-                    "msgtype": "m.text",
-                    "body": message
-                }
+                content=content
             )
-
-        except Exception:
-            LOG.error("Failed to send message.")
-
-    async def send_html(self, room_id, message):
-        try:
-            limit = 1000000
-
-            soup = bs.BeautifulSoup(message, "html.parser")
-            for data in soup(['style', 'script']):
-                data.decompose()
-            clean_message = ' '.join(soup.stripped_strings)
-
-            if len(message) > limit:
-                message = f"{message[:limit]} [truncated]"
-            await self.client.room_send(
-                room_id=room_id,
-                message_type="m.room.message",
-                content={
-                    "msgtype": "m.text",
-                    "body": clean_message,
-                    "format": "org.matrix.custom.html",
-                    "formatted_body": message
-                }
-            )
-
         except Exception:
             LOG.error("Failed to send message.")
 
