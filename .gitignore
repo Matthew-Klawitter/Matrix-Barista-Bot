@@ -144,3 +144,4 @@ olm/
 .venv
 credentials.json
 nio_store/
+.idea
