@@ -4,6 +4,7 @@ from api.data_objects import Message
 from plugins.roll import DicePlugin
 from plugins.preview import PreviewPlugin
 from plugins.celebrate import CelebratePlugin
+from plugins.dad import DadPlugin
 
 import logging
 
@@ -12,7 +13,7 @@ LOG = logging.getLogger(__name__)
 class PluginManager:
     def __init__(self, bridge):
         self.bridge = bridge
-        self.plugins = [DicePlugin(), PreviewPlugin(), CelebratePlugin()]
+        self.plugins = [DicePlugin(), PreviewPlugin(), CelebratePlugin(), DadPlugin()]
         self.commands = {}
         self.message_listeners = []
         for p in self.plugins:
