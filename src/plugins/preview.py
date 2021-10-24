@@ -1,7 +1,6 @@
 import heapq
 import bs4 as bs
 import re
-import urllib.request
 import nltk
 nltk.download('punkt')
 nltk.download('stopwords')
@@ -26,20 +25,19 @@ class PreviewPlugin:
     async def message_listener(self, message):
         urls = re.findall(r'(https?://\S+)', message.message)
         for url in urls:
-            r = requests.get(url)
-            tree = fromstring(r.content)
-            title = tree.findtext('.//title')
-            summary = self.get_summary(url)
-            response = "<b>{}</b>\n\n{}".format(title, summary)
-            await message.bridge.send_message(message.room_id, html=response)
+            try:
+                r = requests.get(url).text
+                soup = bs.BeautifulSoup(r, 'html.parser')
+                title = soup.find('title')
+                summary = self.get_summary(soup)
+                response = "<b>{}</b>\n\n{}".format(title, summary)
+                await message.bridge.send_message(message.room_id, html=response)
+            except Exception as e:
+                LOG.error(e)
 
-    def get_summary(self, url):
+    def get_summary(self, soup):
         try:
-            scraped_article = urllib.request.urlopen(url)
-            article = scraped_article.read()
-            parsed_article = bs.BeautifulSoup(article, 'lxml')
-
-            paragraphs = parsed_article.find_all('p')
+            paragraphs = soup.find_all('p')
             article_text = ""
 
             for p in paragraphs:
@@ -87,6 +85,6 @@ class PreviewPlugin:
 
             result = pre + summary + post
             return result
-        except ValueError as e:
+        except Exception as e:
             LOG.error(e)
             return "<blockquote>No summary available</blockquote>"
