@@ -5,6 +5,7 @@ from plugins.roll import DicePlugin
 from plugins.preview import PreviewPlugin
 from plugins.celebrate import CelebratePlugin
 from plugins.dad import DadPlugin
+from plugins.wiki import WikiPlugin
 
 import logging
 
@@ -13,7 +14,7 @@ LOG = logging.getLogger(__name__)
 class PluginManager:
     def __init__(self, bridge):
         self.bridge = bridge
-        self.plugins = [DicePlugin(), PreviewPlugin(), CelebratePlugin(), DadPlugin()]
+        self.plugins = [DicePlugin(), PreviewPlugin(), CelebratePlugin(), DadPlugin(), WikiPlugin()]
         self.commands = {}
         self.message_listeners = []
         for p in self.plugins:
