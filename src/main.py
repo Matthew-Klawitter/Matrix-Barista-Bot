@@ -67,8 +67,6 @@ def dump(homeserver, user_id, device_id, access_token, default_room, password):
             {
                 "homeserver": homeserver,  # e.g. "https://matrix.example.org"
                 "user_id": user_id,  # e.g. "@user:example.org"
-                "device_id": device_id,  # device ID, 10 uppercase letters
-                "access_token": access_token,  # cryptogr. access token
                 "default_room": default_room,
                 "password": password,
             },
