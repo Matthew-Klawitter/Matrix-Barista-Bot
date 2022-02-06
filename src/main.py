@@ -126,7 +126,7 @@ async def main():
         LOG.info("Got client")
         bridge = APIBridge(client)
         LOG.info("Created Bridge")
-        plugin_manager = PluginManager(bridge)
+        plugin_manager = PluginManager(bridge, client.default_room)
         LOG.info("Created PluginManager")
         client.add_event_callback(plugin_manager.message_callback, RoomMessageText)
 

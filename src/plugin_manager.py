@@ -19,6 +19,8 @@ class PluginManager:
         self.commands = {}
         self.message_listeners = []
         for p in self.plugins:
+            LOG.info(f"Loading {p}")
+            p.load(default_room)
             for command, callback in p.get_commands().items():
                 self.commands[command] = callback
             if hasattr(p, "message_listener"):

@@ -13,6 +13,9 @@ import logging
 LOG = logging.getLogger(__name__)
 
 class PreviewPlugin:
+    def load(self, room):
+        pass
+
     def get_commands(self):
         return {}
 
