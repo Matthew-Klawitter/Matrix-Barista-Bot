@@ -13,7 +13,7 @@ import logging
 LOG = logging.getLogger(__name__)
 
 class PluginManager:
-    def __init__(self, bridge):
+    def __init__(self, bridge, default_room):
         self.bridge = bridge
         self.plugins = [DicePlugin(), PreviewPlugin(), CelebratePlugin(), DadPlugin(), WikiPlugin(), MumblePlugin()]
         self.commands = {}

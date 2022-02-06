@@ -47,7 +47,7 @@ class MumblePlugin:
 
 
 class AudioFile():
-    BITRATE = 24000
+    BITRATE = 48000
     SECONDS = 60
 
     def __init__(self, name):
@@ -58,7 +58,7 @@ class AudioFile():
         self.name += ".wav"
 
         self.file_obj = wave.open(self.name, "wb")
-        self.file_obj.setparams((2, 2, AudioFile.BITRATE, 0, 'NONE', 'not compressed'))
+        self.file_obj.setparams((1, 2, AudioFile.BITRATE, 0, 'NONE', 'not compressed'))
         self.type = "wav"
 
     def write(self, data):
@@ -76,7 +76,7 @@ class AudioFile():
 
         clipped_name = f"{self.base_name}-clip.wav"
         clipped_obj = wave.open(clipped_name, "wb")
-        clipped_obj.setparams((2, 2, AudioFile.BITRATE, 0, 'NONE', 'not compressed'))
+        clipped_obj.setparams((1, 2, AudioFile.BITRATE, 0, 'NONE', 'not compressed'))
         clipped_obj.writeframes(audio_bytes)
         clipped_obj.close()
 
