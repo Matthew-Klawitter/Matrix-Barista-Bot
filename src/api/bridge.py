@@ -91,3 +91,38 @@ class APIBridge:
             LOG.info("Image was sent successfully")
         except Exception:
             LOG.error(f"Image send of file {image} failed.")
+
+    async def send_audio(self, room_id, filepath):
+        mime_type = "audio/wav"
+
+        file_stat = await aiofiles.os.stat(filepath)
+        async with aiofiles.open(filepath, "r+b") as f:
+            resp, maybe_keys = await self.client.upload(
+                f,
+                content_type=mime_type,
+                filename=os.path.basename(filepath),
+                filesize=file_stat.st_size)
+        if isinstance(resp, UploadResponse):
+            LOG.error("File was uploaded successfully to server. ")
+        else:
+            LOG.error(f"Failed to upload file. Failure response: {resp}")
+
+        content = {
+            "body": os.path.basename(filepath),  # descriptive title
+            "info": {
+                "size": file_stat.st_size,
+                "mimetype": mime_type,
+            },
+            "msgtype": "m.audio",
+            "url": resp.content_uri,
+        }
+
+        try:
+            await self.client.room_send(
+                room_id,
+                message_type="m.room.message",
+                content=content
+            )
+            LOG.info("File was sent successfully")
+        except Exception:
+            LOG.error(f"File send of file {filepath} failed.")
