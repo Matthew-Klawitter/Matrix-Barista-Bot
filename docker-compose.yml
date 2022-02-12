@@ -6,6 +6,8 @@ services:
     volumes:
       - ./nio_store/:/nio_store
       - ./src/:/src
+    env_file:
+      - .env
 volumes:
   src:
   nio_store:
