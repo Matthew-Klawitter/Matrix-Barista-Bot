@@ -17,13 +17,15 @@ class MumblePlugin:
 
         def sound_received_handler(user, soundchunk):
             try:
-                self.audio_file.write(soundchunk.pcm)
+                self.audio_file.write(user["name"], soundchunk.pcm)
             except Exception as e:
                 LOG.error(e)
 
         self.mumble = Mumble(server, nick, password=pwd)
+
         self.mumble.callbacks.set_callback(PCS, sound_received_handler)
-        self.mumble.set_receive_sound(1)  # we want to receive sound
+        self.mumble.set_receive_sound(1)
+
         self.mumble.start()
         self.create_audio_file()
 
@@ -41,43 +43,50 @@ class MumblePlugin:
         return "!clip to save a mumble clip"
 
     async def clip(self, message):
-        clipped_name = self.audio_file.close()
-        await message.bridge.send_audio(message.room_id, clipped_name)
+        clipped_names = self.audio_file.close()
+        for clipped_name in clipped_names:
+            await message.bridge.send_audio(message.room_id, clipped_name)
         self.create_audio_file()
 
 
 class AudioFile():
     BITRATE = 48000
-    SECONDS = 60
+    SECONDS = int(os.getenv("MUMBLE_CLIP_LENGTH"))
 
     def __init__(self, name):
         DEBUG_ENCODER = True
 
         self.base_name = name
-        self.name = name
-        self.name += ".wav"
-
-        self.file_obj = wave.open(self.name, "wb")
-        self.file_obj.setparams((1, 2, AudioFile.BITRATE, 0, 'NONE', 'not compressed'))
+        self.files = {}
         self.type = "wav"
 
-    def write(self, data):
-        self.file_obj.writeframes(data)
+    def get_name(self, username):
+        return f"{self.base_name}-{username}.wav"
+
+    def write(self, username, data):
+        if username not in self.files:
+            file_obj = wave.open(self.get_name(username), "wb")
+            file_obj.setparams((1, 2, AudioFile.BITRATE, 0, 'NONE', 'not compressed'))
+            self.files[username] = file_obj
+        self.files[username].writeframes(data)
 
     def close(self):
-        self.file_obj.close()
+        clipped_names = []
+        for name, file_obj in self.files.items():
+            file_obj.close()
 
-        start_frame = max(0, self.file_obj.getnframes() - AudioFile.SECONDS*AudioFile.BITRATE)
+            start_frame = max(0, file_obj.getnframes() - AudioFile.SECONDS*AudioFile.BITRATE)
 
-        read_obj = wave.open(self.name, "rb")
-        read_obj.setpos(start_frame)
-        audio_bytes = read_obj.readframes(self.file_obj.getnframes() - start_frame)
-        read_obj.close()
+            read_obj = wave.open(self.get_name(name), "rb")
+            read_obj.setpos(start_frame)
+            audio_bytes = read_obj.readframes(file_obj.getnframes() - start_frame)
+            read_obj.close()
 
-        clipped_name = f"{self.base_name}-clip.wav"
-        clipped_obj = wave.open(clipped_name, "wb")
-        clipped_obj.setparams((1, 2, AudioFile.BITRATE, 0, 'NONE', 'not compressed'))
-        clipped_obj.writeframes(audio_bytes)
-        clipped_obj.close()
+            clipped_name = f"{self.base_name}-{name}-clip.wav"
+            clipped_obj = wave.open(clipped_name, "wb")
+            clipped_obj.setparams((1, 2, AudioFile.BITRATE, 0, 'NONE', 'not compressed'))
+            clipped_obj.writeframes(audio_bytes)
+            clipped_obj.close()
+            clipped_names.append(clipped_name)
 
-        return clipped_name
+        return clipped_names
