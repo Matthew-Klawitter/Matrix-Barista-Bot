@@ -18,71 +18,36 @@ from services.mumble_log import MumbleAlerts
 LOG = logging.getLogger(__name__)
 
 STORE_FOLDER = "nio_store/"
-CONFIG_FILE = "credentials.json"
 
 async def load_credentials(client=None):
-    LOG.info("Loading credentials")
-    with open(CONFIG_FILE, "r") as f:
-        LOG.info("Opened credentials file")
-        credentials = json.load(f)
-        if client is None:
-            config = ClientConfig(store_sync_tokens=True)
-            client = CustomEncryptedClient(
-                credentials["homeserver"],
-                credentials["user_id"],
-                store_path=STORE_FOLDER,
-                config=config,
-                default_room=credentials["default_room"],
-            )
-        LOG.info("Created client from existing credentials")
-        client.user_id = credentials['user_id']
-        client.access_token = credentials.get('access_token', '')
-        client.device_id = credentials.get('device_id', '')
-        LOG.info("Logging in")
-        resp = await client.login(client.access_token, client.user_id, client.device_id)
-        if (isinstance(resp, LoginResponse)):
-            LOG.info("Log in sucessful")
-            return client
-        else:
-            LOG.info("Log in with token failed, using password")
-            resp = await client.login(credentials["password"])
-            if (isinstance(resp, LoginResponse)):
-                LOG.info("Log in sucessful")
-                dump(
-                    credentials["homeserver"],
-                    resp.user_id,
-                    resp.device_id,
-                    resp.access_token,
-                    credentials["default_room"],
-                    credentials["password"]
-                )
-                return client
-            else:
-                LOG.error("Log in failed with password")
-                raise Exception(f"Failed to log in: {resp}")
-
-def dump(homeserver, user_id, device_id, access_token, default_room, password):
-    with open(CONFIG_FILE, "w") as f:
-        json.dump(
-            {
-                "homeserver": homeserver,  # e.g. "https://matrix.example.org"
-                "user_id": user_id,  # e.g. "@user:example.org"
-                "default_room": default_room,
-                "password": password,
-            },
-            f
+    credentials = {
+        "homeserver": os.getenv("MATRIX_HOMESERVER"),
+        "user_id": os.getenv("MATRIX_USER"),
+        "password": os.getenv("MATRIX_PASS"),
+        "default_room": os.getenv("MATRIX_ROOM"),
+    }
+    if client is None:
+        config = ClientConfig(store_sync_tokens=True)
+        client = CustomEncryptedClient(
+            credentials["homeserver"],
+            credentials["user_id"],
+            store_path=STORE_FOLDER,
+            config=config,
+            default_room=credentials["default_room"],
         )
+    LOG.info("Logging in")
+    resp = await client.login(credentials["password"])
+    if (isinstance(resp, LoginResponse)):
+        LOG.info("Log in sucessful")
+        return client
+    else:
+        LOG.error("Log in failed with password")
+        raise Exception(f"Failed to log in: {resp}")
 
 async def get_client():
-    if os.path.isfile(CONFIG_FILE):
-        LOG.info("Loading credentials from file")
-        client = await load_credentials()
-    else:
-        LOG.error("No credential file found")
-        raise Exception("No credential file found")
+    client = await load_credentials()
     client.load_store()
     return client
-
 
 class CustomEncryptedClient(AsyncClient):
     def __init__(self, homeserver, user='', device_id='', store_path='', config=None, ssl=None, proxy=None, default_room=None):

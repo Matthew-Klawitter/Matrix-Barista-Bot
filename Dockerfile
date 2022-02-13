@@ -10,6 +10,4 @@ RUN python3 -m pip install -r requirements.txt
 VOLUME ["/nio_store"]
 VOLUME ["/src"]
 
-COPY credentials.json /credentials.json
-
 CMD ["python3", "src/main.py"]

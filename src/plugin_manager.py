@@ -1,3 +1,5 @@
+import os
+
 from nio import MatrixRoom, RoomMessageText
 
 from api.data_objects import Message
@@ -12,10 +14,23 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
+PLUGINS = {
+    "Celebrate": CelebratePlugin,
+    "Dad": DadPlugin,
+    "Clippy": MumblePlugin,
+    "Preview": PreviewPlugin,
+    "Roll": DicePlugin,
+    "Wiki": WikiPlugin,
+}
+
 class PluginManager:
     def __init__(self, bridge, default_room):
         self.bridge = bridge
-        self.plugins = [DicePlugin(), PreviewPlugin(), CelebratePlugin(), DadPlugin(), WikiPlugin(), MumblePlugin()]
+        config_plugins = os.getenv("PLUGINS").split(",")
+        self.plugins = [
+            PLUGINS[name]() for name in config_plugins
+            if name in PLUGINS
+        ]
         self.commands = {}
         self.message_listeners = []
         for p in self.plugins:
