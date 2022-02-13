@@ -43,7 +43,7 @@ class MumblePlugin:
         return "!clip to save a mumble clip"
 
     async def clip(self, message):
-        clipped_names = self.audio_file.close()
+        clipped_names = self.audio_file.close(message.args)
         for clipped_name in clipped_names:
             await message.bridge.send_audio(message.room_id, clipped_name)
         self.create_audio_file()
@@ -70,9 +70,11 @@ class AudioFile():
             self.files[username] = file_obj
         self.files[username].writeframes(data)
 
-    def close(self):
+    def close(self, username):
         clipped_names = []
         for name, file_obj in self.files.items():
+            if username and name != username:
+                continue
             file_obj.close()
 
             start_frame = max(0, file_obj.getnframes() - AudioFile.SECONDS*AudioFile.BITRATE)
