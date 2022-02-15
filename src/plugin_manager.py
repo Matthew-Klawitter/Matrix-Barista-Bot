@@ -9,6 +9,7 @@ from plugins.celebrate import CelebratePlugin
 from plugins.dad import DadPlugin
 from plugins.wiki import WikiPlugin
 from plugins.mumble import MumblePlugin
+from plugins.ratio import RatioPlugin
 
 import logging
 
@@ -21,6 +22,7 @@ PLUGINS = {
     "Preview": PreviewPlugin,
     "Roll": DicePlugin,
     "Wiki": WikiPlugin,
+    "Ratio" : RatioPlugin
 }
 
 class PluginManager:
