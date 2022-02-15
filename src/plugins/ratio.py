@@ -48,7 +48,7 @@ class RatioPlugin:
         crypt_ratio = ["Gas priced", "Thanks for the NFT", "Pump and dump'd"]
         
         ratio_list = [regular_ratio, corporate_ratio, coding_ratio,
-            boardgame_ratio, rent_ratio, cat_ratio, hacker_ratio, stock_ratio, crypt_ratio]
+            boardgame_ratio, rent_ratio, hacker_ratio, stock_ratio, crypt_ratio]
 
         data_set = random.choice(ratio_list)
 
