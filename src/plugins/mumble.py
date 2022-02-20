@@ -1,3 +1,4 @@
+import difflib
 import logging
 import time
 import os
@@ -73,7 +74,7 @@ class AudioFile():
     def close(self, username):
         clipped_names = []
         for name, file_obj in self.files.items():
-            if username and name != username:
+            if not self.is_similar(username, name, 0.7):
                 continue
             file_obj.close()
 
@@ -92,3 +93,7 @@ class AudioFile():
             clipped_names.append(clipped_name)
 
         return clipped_names
+
+    def is_similar(self, username, mumble_name, ratio):
+        return difflib.SequenceMatcher(None, username, mumble_name).ratio() > ratio
+
