@@ -73,8 +73,15 @@ class AudioFile():
 
     def close(self, username):
         clipped_names = []
+        ratio = 0.7
+        
+        try:
+            ratio = float(os.getenv("MUMBLE_CLIP_RATIO"))
+        except ValueError:
+            LOG.info(f"Unable to convert env var 'MUMBLE_CLIP_RATIO' to float. Using default 0.7.")
+
         for name, file_obj in self.files.items():
-            if not self.is_similar(username, name, 0.7):
+            if not self.is_similar(username, name, ratio):
                 continue
             file_obj.close()
 
