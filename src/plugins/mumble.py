@@ -81,7 +81,7 @@ class AudioFile():
             LOG.info(f"Unable to convert env var 'MUMBLE_CLIP_RATIO' to float. Using default 0.7.")
 
         for name, file_obj in self.files.items():
-            if not self.is_similar(username, name, ratio):
+            if username and not self.is_similar(username, name, ratio):
                 continue
             file_obj.close()
 
