@@ -40,15 +40,17 @@ class RatioPlugin:
         coding_ratio = ["Syntax error", "Semicolon'd", "Out of memory",
             "Garbage collected", "/dev/null"]
         boardgame_ratio = ["Natural 1", "Checkmate", "Analysis paralysis",
-            "En passant"]
+            "En passant", "Reverse card", "Trap card", "King me"]
         rent_ratio = ["Over priced", "Landlorded", "Renters agreement", 
-            "Rent to OWNed"]
+            "Rent to OWNed", "No water"]
         hacker_ratio = ["Social engineered", "Wacky digits", "Agent Surefire'd"]
-        stock_ratio = ["Stonked", "Not financial advice", "Weak hands", "Bought the dip"]
-        crypt_ratio = ["Gas priced", "Thanks for the NFT", "Pump and dump'd"]
+        stock_ratio = ["Stonked", "Not financial advice", "Paper hands", "Bought the dip"]
+        crypt_ratio = ["Gas priced", "Thanks for the NFT", "Pump and dump'd",
+            "Screenshotted", "Fungible", "Right clicked"]
+        chef_ratio = ["Overcooked", "Toasted", "Burned", "Roasted"]
         
         ratio_list = [regular_ratio, corporate_ratio, coding_ratio,
-            boardgame_ratio, rent_ratio, hacker_ratio, stock_ratio, crypt_ratio]
+            boardgame_ratio, rent_ratio, hacker_ratio, stock_ratio, crypt_ratio, chef_ratio]
 
         data_set = random.choice(ratio_list)
 
