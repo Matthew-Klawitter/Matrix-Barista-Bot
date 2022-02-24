@@ -11,6 +11,8 @@ from nio import (AsyncClient, ClientConfig, DevicesError, Event,InviteEvent, Log
                  LocalProtocolError, MatrixRoom, MatrixUser, RoomMessageText,
                  crypto, exceptions, RoomSendResponse)
 
+from tortoise import Tortoise, run_async
+
 from api.bridge import APIBridge
 from plugin_manager import PluginManager
 from services.mumble_log import MumbleAlerts
@@ -48,6 +50,18 @@ async def get_client():
     client = await load_credentials()
     client.load_store()
     return client
+
+async def init_database():
+    username = os.getenv("POSTGRES_USER")
+    password = os.getenv("POSTGRES_PASSWORD")
+    database = os.getenv("POSTGRES_DB")
+    connection_string = "postgres://{username}:{password}@postgres:5432/{database}".format(username = username, password = password, database = database)
+
+    await Tortoise.init(
+        db_url=connection_string,
+        modules={'models': ['models.models']}
+    )
+    await Tortoise.generate_schemas()
 
 class CustomEncryptedClient(AsyncClient):
     def __init__(self, homeserver, user='', device_id='', store_path='', config=None, ssl=None, proxy=None, default_room=None):
@@ -87,6 +101,8 @@ async def periodic(services, timeout):
 
 async def main():
     try:
+        LOG.info("Attempting to connect to database...")
+        await init_database()
         client = await(get_client())
         LOG.info("Got client")
         bridge = APIBridge(client)
