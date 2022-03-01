@@ -14,6 +14,7 @@ services:
     volumes:
       - ./nio_store/:/nio_store
       - ./src/:/src
+      - /var/log/mumble-server/mumble-server.log:/var/log/mumble-server/mumble-server.log
     env_file:
       - .env
     depends_on:
