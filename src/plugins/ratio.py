@@ -32,33 +32,36 @@ class RatioPlugin:
 
     def get_ratio(self):
         # Current data used for ratio generation
-        regular_ratio = ["L", "Ratio", "I'm a Chad", "You fell off",
-            "You done messed up", "Reaction score", "Upset", "Not a bot",
-            "You moron", "Dumber than a bot", "Percentile"]
-        corporate_ratio = ["No synergy", "Touchbase", "HR'd",
+        general = ["L", "Ratio", "You fell off"]
+        insult = ["You done messed up", "Reaction score", "Upset", "You moron",
+            "Percentile"]
+        corporate = ["No synergy", "Touchbase", "HR'd",
             "Get ping'd", "Overtime"]
-        coding_ratio = ["Syntax error", "Semicolon'd", "Out of memory",
+        coding = ["Syntax error", "Semicolon'd", "Out of memory",
             "Garbage collected", "/dev/null"]
-        boardgame_ratio = ["Natural 1", "Checkmate", "Analysis paralysis",
+        boardgame = ["Natural 1", "Checkmate", "Analysis paralysis",
             "En passant", "Reverse card", "Trap card", "King me"]
-        rent_ratio = ["Over priced", "Landlorded", "Renters agreement", 
+        rent = ["Over priced", "Landlorded", "Renters agreement", 
             "Rent to OWNed", "No water"]
-        hacker_ratio = ["Social engineered", "Wacky digits", "Agent Surefire'd"]
-        stock_ratio = ["Stonked", "Not financial advice", "Paper hands", "Bought the dip"]
-        crypt_ratio = ["Gas priced", "Thanks for the NFT", "Pump and dump'd",
+        hacker = ["Social engineered", "Wacky digits", "Agent Surefire'd"]
+        stock = ["Stonked", "Not financial advice", "Paper hands", "Bought the dip"]
+        crypt = ["Gas priced", "Thanks for the NFT", "Pump and dump'd",
             "Screenshotted", "Fungible", "Right clicked"]
-        chef_ratio = ["Overcooked", "Toasted", "Burned", "Roasted"]
+        chef = ["Overcooked", "Toasted", "Burned", "Roasted"]
+        elden = ["No Maidens", "Your sword has shoddy craftsmanship",
+            "Your treasure hoard is empty", "No vigor"]
         
-        ratio_list = [regular_ratio, corporate_ratio, coding_ratio,
-            boardgame_ratio, rent_ratio, hacker_ratio, stock_ratio, crypt_ratio, chef_ratio]
+        ratio_list = [insult, corporate, coding, boardgame, rent, hacker, stock,
+            crypt, chef, elden]
 
         data_set = random.choice(ratio_list)
 
         if (len(data_set) >= 3):
+            response0 = random.choice(general)
             response1 = random.choice(data_set)
             data_set.remove(response1)
             response2 = random.choice(data_set)
             data_set.remove(response2)
             response3 = random.choice(data_set)
-            return "{} + {} + {}".format(response1, response2, response3)
+            return "{} + {} + {} + {}".format(response0, response1, response2, response3)
         return None
