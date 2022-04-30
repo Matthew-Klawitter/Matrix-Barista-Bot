@@ -22,12 +22,13 @@ PLUGINS = {
     "Preview": PreviewPlugin,
     "Roll": DicePlugin,
     "Wiki": WikiPlugin,
-    "Ratio" : RatioPlugin
+    "Ratio": RatioPlugin
 }
 
 class PluginManager:
-    def __init__(self, bridge, default_room):
+    def __init__(self, bridge, default_room, user):
         self.bridge = bridge
+        self.user = user[1:user.index(":")]
         config_plugins = os.getenv("PLUGINS").split(",")
         self.plugins = [
             PLUGINS[name]() for name in config_plugins
@@ -45,10 +46,11 @@ class PluginManager:
 
     async def message_callback(self, room: MatrixRoom, event: RoomMessageText) -> None:
         message = Message(self.bridge, room, event)
-        for listener in self.message_listeners:
-            try:
-                await listener(message)
-            except Exception as e:
-                LOG.error(e)
-        if message.is_command and message.command in self.commands:
-            await self.commands[message.command](message)
+        if not message.username.lower() == self.user.lower():
+            for listener in self.message_listeners:
+                try:
+                    await listener(message)
+                except Exception as e:
+                    LOG.error(e)
+            if message.is_command and message.command in self.commands:
+                await self.commands[message.command](message)

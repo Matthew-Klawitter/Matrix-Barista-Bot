@@ -35,7 +35,7 @@ async def load_credentials(client=None):
             credentials["user_id"],
             store_path=STORE_FOLDER,
             config=config,
-            default_room=credentials["default_room"],
+            default_room=credentials["default_room"]
         )
     LOG.info("Logging in")
     resp = await client.login(credentials["password"])
@@ -70,6 +70,7 @@ class CustomEncryptedClient(AsyncClient):
         if store_path and not os.path.isdir(store_path):
             os.mkdir(store_path)
         self.default_room = default_room
+        self.user = user
 
     def trust_devices(self) -> None:
         room_devices = self.room_devices(self.default_room)
@@ -107,7 +108,7 @@ async def main():
         LOG.info("Got client")
         bridge = APIBridge(client)
         LOG.info("Created Bridge")
-        plugin_manager = PluginManager(bridge, client.default_room)
+        plugin_manager = PluginManager(bridge, client.default_room, client.user)
         LOG.info("Created PluginManager")
         client.add_event_callback(plugin_manager.message_callback, RoomMessageText)
 
