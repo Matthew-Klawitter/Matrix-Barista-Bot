@@ -4,9 +4,11 @@ import sys
 import json
 import getpass
 import logging
+import requests
 
 from typing import Optional
 
+from aiohttp import web
 from nio import (AsyncClient, ClientConfig, DevicesError, Event,InviteEvent, LoginResponse,
                  LocalProtocolError, MatrixRoom, MatrixUser, RoomMessageText,
                  crypto, exceptions, RoomSendResponse)
@@ -119,11 +121,26 @@ async def main():
     except (asyncio.CancelledError, KeyboardInterrupt):
         await client.close()
 
+
+async def health(request):
+    return web.Response(text="<h1> Async Rest API using aiohttp : Health OK </h1>",
+                        content_type='text/html')
+
+async def start():
+    app = web.Application()
+    app.router.add_get("/health", health)
+    return app
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     try:
-        asyncio.run(
-            main()
-        )
+        LOG.info("Attempting to create rest service...")
+        application = start()
+        web.run_app(application, port=8000)
+        LOG.info("Doing more things")
+        # asyncio.run(
+        #     main()
+        # )
     except KeyboardInterrupt:
         pass
