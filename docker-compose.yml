@@ -16,7 +16,7 @@ services:
       - ./src/:/src
       - /var/log/mumble-server/mumble-server.log:/var/log/mumble-server/mumble-server.log
     ports:
-      - 8000:8000
+      - 8008:8008
     env_file:
       - .env
     depends_on:

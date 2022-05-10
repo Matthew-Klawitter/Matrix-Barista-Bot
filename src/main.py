@@ -102,10 +102,25 @@ async def periodic(services, timeout):
             await s.task()
         await asyncio.sleep(timeout)
 
+async def health(request):
+    return web.Response(text="<h1> Async Rest API using aiohttp : Health OK </h1>",
+                        content_type='text/html')
+
+async def start():
+    app = web.Application()
+    app.router.add_get("/health", health)
+    return app
+
 async def main():
     try:
         LOG.info("Attempting to connect to database...")
         await init_database()
+        LOG.info("Attempting to create rest service...")
+        app = await start()
+        runner = web.AppRunner(app)
+        await runner.setup()
+        site = web.TCPSite(runner, 'matrix-bot', 8008)
+        await site.start()
         client = await(get_client())
         LOG.info("Got client")
         bridge = APIBridge(client)
@@ -122,25 +137,12 @@ async def main():
         await client.close()
 
 
-async def health(request):
-    return web.Response(text="<h1> Async Rest API using aiohttp : Health OK </h1>",
-                        content_type='text/html')
-
-async def start():
-    app = web.Application()
-    app.router.add_get("/health", health)
-    return app
-
-
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     try:
-        LOG.info("Attempting to create rest service...")
-        application = start()
-        web.run_app(application, port=8000)
         LOG.info("Doing more things")
-        # asyncio.run(
-        #     main()
-        # )
+        asyncio.run(
+            main()
+        )
     except KeyboardInterrupt:
         pass
