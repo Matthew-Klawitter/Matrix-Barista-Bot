@@ -102,35 +102,32 @@ async def periodic(services, timeout):
             await s.task()
         await asyncio.sleep(timeout)
 
-async def health(request):
-    return web.Response(text="<h1> Async Rest API using aiohttp : Health OK </h1>",
-                        content_type='text/html')
-
-async def start():
-    app = web.Application()
-    app.router.add_get("/health", health)
-    return app
 
 async def main():
     try:
         LOG.info("Attempting to connect to database...")
         await init_database()
-        LOG.info("Attempting to create rest service...")
-        app = await start()
-        runner = web.AppRunner(app)
-        await runner.setup()
-        site = web.TCPSite(runner, 'matrix-bot', 8008)
-        await site.start()
+        web_app = web.Application()
+        LOG.info("Created web app")
+        LOG.info("Connected to database.")
         client = await(get_client())
         LOG.info("Got client")
         bridge = APIBridge(client)
         LOG.info("Created Bridge")
-        plugin_manager = PluginManager(bridge, client.default_room, client.user)
+        plugin_manager = PluginManager(bridge, client.default_room, client.user, web_app)
         LOG.info("Created PluginManager")
         client.add_event_callback(plugin_manager.message_callback, RoomMessageText)
-
+        LOG.info("Starting services...")
         services = [MumbleAlerts(bridge, client.default_room)]
         periodic_loop = asyncio.create_task(periodic(services, 1))
+        LOG.info("Finished created services.")
+
+        LOG.info("Attempting to start rest services services...")
+        runner = web.AppRunner(web_app)
+        await runner.setup()
+        site = web.TCPSite(runner, 'matrix-bot', 8008)
+        await site.start()
+        LOG.info("Rest services running ")
 
         await run_client(client)
     except (asyncio.CancelledError, KeyboardInterrupt):

@@ -4,6 +4,7 @@ import time
 import os
 import wave
 
+from aiohttp import web
 from pymumble_py3 import Mumble
 from pymumble_py3.callbacks import PYMUMBLE_CLBK_SOUNDRECEIVED as PCS
 
@@ -11,7 +12,7 @@ LOG = logging.getLogger(__name__)
 
 class MumblePlugin:
 
-    def load(self, room):
+    def load(self, room, web_app):
         pwd = os.getenv("MUMBLE_PASS")
         server = os.getenv("MUMBLE_SERVER")
         nick = "ClipBot"
