@@ -9,13 +9,14 @@ LOG = logging.getLogger(__name__)
 
 class RatioPlugin:
     def __init__(self):
-        self.ratios = 0
+        self.should_ratio = False
 
     def load(self, room, web_app):
-        web_app.router.add_get("/ratio", self.get_ratios)
+        web_app.router.add_post("/plugins/ratio/trigger_next", self.trigger_next)
 
-    async def get_ratios(self, request):
-        return web.Response(text=str(self.ratios), content_type='text/html')
+    async def trigger_next(self, request):
+        self.should_ratio = True
+        return web.Response(text='ok', content_type="text/html")
 
     def get_commands(self):
         return {}
@@ -28,14 +29,17 @@ class RatioPlugin:
 
     async def message_listener(self, message):
         chance = os.getenv("RATIO_CHANCE")
-        if (chance is not None):
+        if chance is not None:
             try:
                 chance = int(chance)
-                if (chance >= 1 and random.randint(1, 100) <= chance):
+                ratio = None
+                if self.should_ratio:
                     ratio = self.get_ratio()
-
-                    if (ratio is not None):
-                        await message.bridge.send_message(message.room_id, text=ratio)
+                    self.should_ratio = False
+                elif chance >= 1 and random.randint(1, 100) <= chance:
+                    ratio = self.get_ratio()
+                if ratio is not None:
+                    await message.bridge.send_message(message.room_id, text=ratio)
             except TypeError:
                 pass
 
@@ -82,7 +86,7 @@ class RatioPlugin:
         base = []
         data_set = random.choice(ratio_list)
 
-        if (len(data_set) >= 3):
+        if len(data_set) >= 3:
             response0 = random.choice(prefix)
             base.append(response0)
             base.append(" + ")
@@ -105,6 +109,5 @@ class RatioPlugin:
             for phrase in base:
                 response += "{}".format(phrase)
 
-            self.ratios += 1
             return response
         return None
