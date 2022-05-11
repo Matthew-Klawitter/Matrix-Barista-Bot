@@ -2,11 +2,21 @@ import logging
 import os
 import random
 
+from aiohttp import web
+
 LOG = logging.getLogger(__name__)
 
+
 class RatioPlugin:
-    def load(self, room):
-        pass
+    def __init__(self):
+        self.should_ratio = False
+
+    def load(self, room, web_app):
+        web_app.router.add_post("/plugins/ratio/trigger_next", self.trigger_next)
+
+    async def trigger_next(self, request):
+        self.should_ratio = True
+        return web.Response(text='ok', content_type="text/html")
 
     def get_commands(self):
         return {}
@@ -19,56 +29,64 @@ class RatioPlugin:
 
     async def message_listener(self, message):
         chance = os.getenv("RATIO_CHANCE")
-        if (chance is not None):
+        if chance is not None:
             try:
                 chance = int(chance)
-                if (chance >= 1 and random.randint(1, 100) <= chance):
+                ratio = None
+                if self.should_ratio:
                     ratio = self.get_ratio()
-
-                    if (ratio is not None):
-                        await message.bridge.send_message(message.room_id, text=ratio)
+                    self.should_ratio = False
+                elif chance >= 1 and random.randint(1, 100) <= chance:
+                    ratio = self.get_ratio()
+                if ratio is not None:
+                    await message.bridge.send_message(message.room_id, text=ratio)
             except TypeError:
-                pass           
+                pass
 
     def get_ratio(self):
         # Current data used for ratio generation
         prefix = ["L", "Ratio"]
         insult = ["You done messed up", "Reaction score", "Upset", "You moron",
-            "Percentile"]
+                  "Percentile"]
         corporate = ["No synergy", "Touchbase", "HR'd",
-            "Get ping'd", "Overtime"]
+                     "Get ping'd", "Overtime"]
         coding = ["Syntax error", "Semicolon'd", "Out of memory",
-            "Garbage collected", "/dev/null"]
+                  "Garbage collected", "/dev/null"]
         boardgame = ["Natural 1", "Checkmate", "Analysis paralysis",
-            "En passant", "Reverse card", "Trap card", "King me"]
-        rent = ["Over priced", "Landlorded", "Renters agreement", 
-            "Rent to OWNed", "No water"]
+                     "En passant", "Reverse card", "Trap card", "King me"]
+        rent = ["Over priced", "Landlorded", "Renters agreement",
+                "Rent to OWNed", "No water"]
         hacker = ["Social engineered", "Wacky digits", "Agent Surefire'd", "Literally in your system", "No anti-virus"]
         stock = ["Stonked", "Not financial advice", "Paper hands", "Bought the dip", "Went broke"]
         crypt = ["Gas priced", "Thanks for the NFT", "Pump and dump'd",
-            "Screenshotted", "Fungible", "Right clicked"]
+                 "Screenshotted", "Fungible", "Right clicked"]
         chef = ["Overcooked", "Toasted", "Burned", "Roasted", "Raw", "Unseasoned", "Eggless coffee"]
         elden = ["No Maidens", "Your sword has shoddy craftsmanship",
-            "Your treasure hoard is empty", "No vigor"]
+                 "Your treasure hoard is empty", "No vigor"]
         dino = ["Extinct", "Fossilized", "Stuck in tar"]
         cringe = ["Cringe", "Cope", "Ok boomer", "You are not just a clown you are the entire circus"]
         rude = ["Didn't ask", "Don't care", "Skill issue"]
         news = ["Fake news", "That's made up", "Old news bro", "So yesterday"]
         reddit = ["Reddit silver", "No upvotes", "Go tell Reddit", "Log off", "You're going in my cringe compilation"]
-        pirate = ["Plundered", "Pillaged", "I found yer treasure", "Davy Jones don't even want the likes of ye in his locker", "Shipwrecked", "No booty", "All yer wenches be servicin' my crew"]
-        caveman = ["Me have bigger cave", "Me not care", "Small meat stick", "Touch rock", "Never breed", "You not only Ooga but entire Chakalaka"]
-        french = ["You are english", "Mind your own business", "Boil your bottoms", "You're the son of a silly person", "I blow my nose at you", "'So called'", "Your KNNH-Knights are silly", "Block me before I taunt you a second time"]
+        pirate = ["Plundered", "Pillaged", "I found yer treasure",
+                  "Davy Jones don't even want the likes of ye in his locker", "Shipwrecked", "No booty",
+                  "All yer wenches be servicin' my crew"]
+        caveman = ["Me have bigger cave", "Me not care", "Small meat stick", "Touch rock", "Never breed",
+                   "You not only Ooga but entire Chakalaka"]
+        french = ["You are english", "Mind your own business", "Boil your bottoms", "You're the son of a silly person",
+                  "I blow my nose at you", "'So called'", "Your KNNH-Knights are silly",
+                  "Block me before I taunt you a second time"]
         tf2 = ["Red spy in the base", "No medics", "Flag stolen", "I have more crates than you", "Not MANN enough"]
         fish = ["Not enough bait", "Weak hook", "I catch more fish than you"]
         windows = ["Windows user", "Incoming Windows update", "Bill-Gated", "Reinstall your OS"]
 
         ratio_list = [insult, corporate, coding, boardgame, rent, hacker, stock,
-            crypt, chef, elden, dino, cringe, rude, news, reddit, pirate, caveman, french, tf2, fish, windows]
+                      crypt, chef, elden, dino, cringe, rude, news, reddit, pirate, caveman, french, tf2, fish, windows]
 
         base = []
         data_set = random.choice(ratio_list)
 
-        if (len(data_set) >= 3):
+        if len(data_set) >= 3:
             response0 = random.choice(prefix)
             base.append(response0)
             base.append(" + ")

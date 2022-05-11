@@ -4,9 +4,11 @@ import sys
 import json
 import getpass
 import logging
+import requests
 
 from typing import Optional
 
+from aiohttp import web
 from nio import (AsyncClient, ClientConfig, DevicesError, Event,InviteEvent, LoginResponse,
                  LocalProtocolError, MatrixRoom, MatrixUser, RoomMessageText,
                  crypto, exceptions, RoomSendResponse)
@@ -100,28 +102,42 @@ async def periodic(services, timeout):
             await s.task()
         await asyncio.sleep(timeout)
 
+
 async def main():
     try:
         LOG.info("Attempting to connect to database...")
         await init_database()
+        web_app = web.Application()
+        LOG.info("Created web app")
+        LOG.info("Connected to database.")
         client = await(get_client())
         LOG.info("Got client")
         bridge = APIBridge(client)
         LOG.info("Created Bridge")
-        plugin_manager = PluginManager(bridge, client.default_room, client.user)
+        plugin_manager = PluginManager(bridge, client.default_room, client.user, web_app)
         LOG.info("Created PluginManager")
         client.add_event_callback(plugin_manager.message_callback, RoomMessageText)
-
+        LOG.info("Starting services...")
         services = [MumbleAlerts(bridge, client.default_room)]
         periodic_loop = asyncio.create_task(periodic(services, 1))
+        LOG.info("Finished created services.")
+
+        LOG.info("Attempting to start rest services services...")
+        runner = web.AppRunner(web_app)
+        await runner.setup()
+        site = web.TCPSite(runner, 'matrix-bot', 8008)
+        await site.start()
+        LOG.info("Rest services running ")
 
         await run_client(client)
     except (asyncio.CancelledError, KeyboardInterrupt):
         await client.close()
 
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     try:
+        LOG.info("Doing more things")
         asyncio.run(
             main()
         )

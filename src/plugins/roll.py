@@ -1,6 +1,7 @@
 import random
 import re
 
+from aiohttp import web
 
 """
 Main Plugin class that manages command usage
@@ -8,7 +9,7 @@ Main Plugin class that manages command usage
 
 
 class DicePlugin:
-    def load(self, room):
+    def load(self, room, web_app):
         pass
 
     async def task(self, message):

@@ -8,13 +8,14 @@ nltk.download('stopwords')
 
 import requests
 from lxml.html import fromstring
+from aiohttp import web
 
 import logging
 
 LOG = logging.getLogger(__name__)
 
 class CelebratePlugin:
-    def load(self, room):
+    def load(self, room, web_app):
         pass
 
     def get_commands(self):

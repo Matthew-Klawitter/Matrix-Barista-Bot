@@ -1,13 +1,14 @@
 import random
 import re
 
+from aiohttp import web
 
 """
 Main Plugin class that manages command usage
 """
 
 class AnonPlugin:
-    def load(self, room):
+    def load(self, room, web_app):
         self.room = room
 
     async def task(self, message):

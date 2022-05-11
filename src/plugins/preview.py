@@ -6,6 +6,7 @@ nltk.download('punkt')
 nltk.download('stopwords')
 
 import requests
+from aiohttp import web
 from lxml.html import fromstring
 
 import logging
@@ -13,7 +14,7 @@ import logging
 LOG = logging.getLogger(__name__)
 
 class PreviewPlugin:
-    def load(self, room):
+    def load(self, room, web_app):
         pass
 
     def get_commands(self):
