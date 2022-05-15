@@ -79,9 +79,13 @@ class RatioPlugin:
         tf2 = ["Red spy in the base", "No medics", "Flag stolen", "I have more crates than you", "Not MANN enough"]
         fish = ["Not enough bait", "Weak hook", "I catch more fish than you"]
         windows = ["Windows user", "Incoming Windows update", "Bill-Gated", "Reinstall your OS"]
+        question = ["Dignity?", "Self-esteem?", "Honor?", "self-respect?", "decency?", "restraint?", "reserve?",
+                    "respectability?", "pride?", "modesty?", "manners?", "chastity?", "embarrassment?", "shame?",
+                    "discretion?", "temperance?", "caution?", "consideration for one's own person?"]
 
         ratio_list = [insult, corporate, coding, boardgame, rent, hacker, stock,
-                      crypt, chef, elden, dino, cringe, rude, news, reddit, pirate, caveman, french, tf2, fish, windows]
+                      crypt, chef, elden, dino, cringe, rude, news, reddit, pirate,
+                      caveman, french, tf2, fish, windows, question]
 
         base = []
         data_set = random.choice(ratio_list)
