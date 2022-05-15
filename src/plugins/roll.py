@@ -9,7 +9,7 @@ Main Plugin class that manages command usage
 
 
 class DicePlugin:
-    def load(self, room, web_app):
+    def load(self, room, web_app, web_admin):
         pass
 
     async def task(self, message):

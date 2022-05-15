@@ -15,7 +15,7 @@ import logging
 LOG = logging.getLogger(__name__)
 
 class CelebratePlugin:
-    def load(self, room, web_app):
+    def load(self, room, web_app, web_admin):
         pass
 
     def get_commands(self):

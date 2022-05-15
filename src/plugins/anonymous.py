@@ -8,7 +8,7 @@ Main Plugin class that manages command usage
 """
 
 class AnonPlugin:
-    def load(self, room, web_app):
+    def load(self, room, web_app, web_admin):
         self.room = room
 
     async def task(self, message):

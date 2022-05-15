@@ -11,8 +11,8 @@ class RatioPlugin:
     def __init__(self):
         self.should_ratio = False
 
-    def load(self, room, web_app):
-        web_app.router.add_post("/plugins/ratio/trigger_next", self.trigger_next)
+    def load(self, room, web_app, web_admin):
+        web_admin.router.add_post("/plugins/ratio/trigger_next", self.trigger_next)
 
     async def trigger_next(self, request):
         self.should_ratio = True

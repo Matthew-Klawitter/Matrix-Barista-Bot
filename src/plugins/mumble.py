@@ -12,7 +12,7 @@ LOG = logging.getLogger(__name__)
 
 class MumblePlugin:
 
-    def load(self, room, web_app):
+    def load(self, room, web_app, web_admin):
         pwd = os.getenv("MUMBLE_PASS")
         server = os.getenv("MUMBLE_SERVER")
         nick = "ClipBot"

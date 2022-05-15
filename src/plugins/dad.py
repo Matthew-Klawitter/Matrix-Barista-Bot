@@ -5,7 +5,7 @@ from aiohttp import web
 LOG = logging.getLogger(__name__)
 
 class DadPlugin:
-    def load(self, room, web_app):
+    def load(self, room, web_app, web_admin):
         pass
 
     def get_commands(self):

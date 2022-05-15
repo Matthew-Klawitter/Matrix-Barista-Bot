@@ -26,7 +26,7 @@ PLUGINS = {
 }
 
 class PluginManager:
-    def __init__(self, bridge, default_room, user, web_app):
+    def __init__(self, bridge, default_room, user, web_app, web_admin):
         self.bridge = bridge
         self.user = user[1:user.index(":")]
         config_plugins = os.getenv("PLUGINS").split(",")
@@ -38,7 +38,7 @@ class PluginManager:
         self.message_listeners = []
         for p in self.plugins:
             LOG.info(f"Loading {p}")
-            p.load(default_room, web_app)
+            p.load(default_room, web_app, web_admin)
             for command, callback in p.get_commands().items():
                 self.commands[command] = callback
             if hasattr(p, "message_listener"):
