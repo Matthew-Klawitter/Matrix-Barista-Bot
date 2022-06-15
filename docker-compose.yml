@@ -1,13 +1,13 @@
 version: "3"
 services:
-  postgres:
-    image: postgres:latest
-    ports:
-      - 5432:5432
-    env_file:
-      - .env
-    volumes:
-      - ./db-data/:/var/lib/postgresql/data/
+#  postgres:
+#    image: postgres:latest
+#    ports:
+#      - 5432:5432
+#    env_file:
+#      - .env
+#    volumes:
+#      - ./db-data/:/var/lib/postgresql/data/
   matrix-bot:
     image: matrix_bot:latest
     container_name: matrix_bot
@@ -19,8 +19,8 @@ services:
       - 8008:8008
     env_file:
       - .env
-    depends_on:
-      - postgres
+#    depends_on:
+#      - postgres
 volumes:
   src:
   nio_store:

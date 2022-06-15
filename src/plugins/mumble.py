@@ -1,4 +1,5 @@
 import difflib
+import json
 import logging
 import time
 import os
@@ -31,6 +32,13 @@ class MumblePlugin:
         self.mumble.start()
         self.create_audio_file()
 
+        # Serve useful data our mumble client gathers
+        self.setup_routes(web_admin)
+
+    def setup_routes(self, web_admin):
+        web_admin.router.add_get("/plugins/mumble/connected", self.connected_users)
+        web_admin.router.add_get("/plugins/mumble/users", self.get_users)
+
     def create_audio_file(self):
         audio_file_name = os.path.join("/tmp/", "mumble-%s" % time.strftime("%Y%m%d-%H%M%S"))
         self.audio_file = AudioFile(audio_file_name)
@@ -49,6 +57,16 @@ class MumblePlugin:
         for clipped_name in clipped_names:
             await message.bridge.send_audio(message.room_id, clipped_name)
         self.create_audio_file()
+
+    async def connected_users(self, request):
+        connected = self.mumble.users.count()
+        res = {"amount": connected}
+        return web.json_response(res)
+
+    async def get_users(self, request):
+        users = self.mumble.users
+        res = json.dumps(users)
+        return web.json_response(res)
 
 
 class AudioFile():

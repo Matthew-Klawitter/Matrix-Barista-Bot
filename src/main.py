@@ -144,13 +144,13 @@ async def check_token(token: str):
 
 async def main():
     try:
-        LOG.info("Attempting to connect to database...")
-        await init_database()
+        #LOG.info("Attempting to connect to database...")
+        #await init_database()
         web_app = web.Application(client_max_size=int(os.getenv("WEB_CLIENT_MAX_SIZE")))
         web_admin = web.Application(client_max_size=int(os.getenv("WEB_CLIENT_MAX_SIZE")),
-                                  middlewares=[token_auth_middleware()])
+                                    middlewares=[token_auth_middleware()])
         LOG.info("Created web app")
-        LOG.info("Connected to database.")
+        #LOG.info("Connected to database.")
         client = await(get_client())
         LOG.info("Got client")
         bridge = APIBridge(client)
