@@ -10,6 +10,7 @@ from plugins.dad import DadPlugin
 from plugins.wiki import WikiPlugin
 from plugins.mumble import MumblePlugin
 from plugins.ratio import RatioPlugin
+from plugins.rip import RipPlugin
 
 import logging
 
@@ -22,7 +23,8 @@ PLUGINS = {
     "Preview": PreviewPlugin,
     "Roll": DicePlugin,
     "Wiki": WikiPlugin,
-    "Ratio": RatioPlugin
+    "Ratio": RatioPlugin,
+    "Rip": RipPlugin,
 }
 
 class PluginManager:
