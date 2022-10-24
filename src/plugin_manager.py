@@ -11,6 +11,7 @@ from plugins.wiki import WikiPlugin
 from plugins.mumble import MumblePlugin
 from plugins.ratio import RatioPlugin
 from plugins.rip import RipPlugin
+from plugins.pin import PinPlugin
 
 import logging
 
@@ -25,6 +26,7 @@ PLUGINS = {
     "Wiki": WikiPlugin,
     "Ratio": RatioPlugin,
     "Rip": RipPlugin,
+    "Pin": PinPlugin,
 }
 
 class PluginManager:

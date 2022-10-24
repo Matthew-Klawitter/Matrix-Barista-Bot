@@ -15,6 +15,7 @@ services:
       - ./nio_store/:/nio_store
       - ./src/:/src
       - ./res/:/res
+      - ./data/:/data
       - /var/log/mumble-server/mumble-server.log:/var/log/mumble-server/mumble-server.log
     ports:
       - 8008:8008
