@@ -4,6 +4,7 @@ import logging
 import time
 import os
 import wave
+import subprocess
 
 from aiohttp import web
 from pymumble_py3 import Mumble
@@ -34,10 +35,28 @@ class MumblePlugin:
 
         # Serve useful data our mumble client gathers
         self.setup_routes(web_admin)
+        web_app.router.add_get("/plugins/mumble/clip", self.clip_route)
+        web_app.router.add_get("/plugins/mumble/file", self.file_route)
+        web_app.router.add_get("/plugins/mumble/submit", self.submit_clip_route)
 
     def setup_routes(self, web_admin):
         web_admin.router.add_get("/plugins/mumble/connected", self.connected_users)
         web_admin.router.add_get("/plugins/mumble/users", self.get_users)
+
+    def clip_route(self, request):
+        return web.FileResponse("/res/clip.html")
+
+    def file_route(self, request):
+        return web.FileResponse(f'/tmp/{request.query["path"]}')
+
+    def submit_clip_route(self, request):
+        mn = float(request.query["min"])
+        mx = float(request.query["max"])
+        file = f'/tmp/{request.query["path"]}'
+        name = request.query["name"]
+        duration = mx - mn
+        subprocess.run(["ffmpeg", "-i", file, "-ss", str(mn), "-t", str(duration), "-acodec", "copy", f"/out/{name}.wav"])
+        return web.json_response({})
 
     def create_audio_file(self):
         audio_file_name = os.path.join("/tmp/", "mumble-%s" % time.strftime("%Y%m%d-%H%M%S"))
@@ -55,6 +74,9 @@ class MumblePlugin:
     async def clip(self, message):
         clipped_names = self.audio_file.close(message.args)
         for clipped_name in clipped_names:
+            if "WEB_URL" in os.environ:
+                url = f'{os.environ.get("WEB_URL")}/plugins/mumble/clip?file={os.path.basename(clipped_name)}'
+                await message.bridge.send_message(message.room_id, url)
             await message.bridge.send_audio(message.room_id, clipped_name)
         self.create_audio_file()
 
@@ -92,12 +114,8 @@ class AudioFile():
 
     def close(self, username):
         clipped_names = []
-        ratio = 0.7
-        
-        try:
-            ratio = float(os.getenv("MUMBLE_CLIP_RATIO"))
-        except ValueError:
-            LOG.info(f"Unable to convert env var 'MUMBLE_CLIP_RATIO' to float. Using default 0.7.")
+
+        ratio = float(os.environ.get("MUMBLE_CLIP_RATIO", 0.7))
 
         for name, file_obj in self.files.items():
             if username and not self.is_similar(username, name, ratio):

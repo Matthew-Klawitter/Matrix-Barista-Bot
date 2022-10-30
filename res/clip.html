@@ -1,0 +1,79 @@
+<style>
+    div {
+      width: 100%;
+    }
+
+    input[type=range] {
+      width: 500px;
+    }
+
+    #render {
+      height: 20px;
+    }
+
+    #progress {
+      width: 500px;
+      background-color: black;
+      height: 20px;
+    }
+</style>
+<script>
+  var a
+  var min
+  var max
+  let duration = 20
+  window.onload = function(){
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const params = Object.fromEntries(urlSearchParams.entries());
+    a = new Audio(`/plugins/mumble/file?path=${params.file}`)
+
+    min = document.getElementById("min")
+    max = document.getElementById("max")
+    min.min = 0
+    max.min = 0
+    min.max = duration
+    max.max = duration
+    min.value = 0
+    max.value = duration
+    min.addEventListener('change', (event) => {
+        if(event.target.value > max.value){
+            min.value = max.value
+        }
+    })
+    max.addEventListener('change', (event) => {
+        if(event.target.value < min.value){
+            max.value = min.value
+        }
+    })
+
+    a.ontimeupdate = (event) => {
+      if(event.target.currentTime > max.value){
+        a.pause()
+      }
+      document.getElementById("progress").style.width = `${event.target.currentTime*25}px`
+    };
+  }
+  function play(){
+    a.currentTime = min.value
+    a.play()
+  }
+  function pause(){
+    a.pause()
+  }
+  function submit(){
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const params = Object.fromEntries(urlSearchParams.entries());
+    const name_el = document.getElementById("name")
+    fetch(`/plugins/mumble/submit?min=${min.value}&max=${max.value}&path=${params.file}&name=${name_el.value}`)
+    alert("Submitted soundbite, you can close this tab")
+  }
+</script>
+
+<button onclick="play()">play</button>
+<button onclick="pause()">pause</button>
+
+<div id="render"><div id="progress"></div></div>
+<div><input id="min" type="range" step="0.1" /><span>min</span></div>
+<div><input id="max" type="range" step="0.1" /><span>max</span></div>
+<div><span>clip name (format: name-description_words)</span><input id="name" type="text" /></div>
+<button onclick="submit()">submit</button>
