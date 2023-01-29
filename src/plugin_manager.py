@@ -12,6 +12,7 @@ from plugins.mumble import MumblePlugin
 from plugins.ratio import RatioPlugin
 from plugins.rip import RipPlugin
 from plugins.pin import PinPlugin
+from plugins.social_credit import SocialCreditPlugin
 
 import logging
 
@@ -27,6 +28,7 @@ PLUGINS = {
     "Ratio": RatioPlugin,
     "Rip": RipPlugin,
     "Pin": PinPlugin,
+    "SocialCredit": SocialCreditPlugin,
 }
 
 class PluginManager:
