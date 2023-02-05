@@ -6,6 +6,9 @@ from aiohttp import web
 """
 Main Plugin class that manages command usage
 """
+import logging
+
+LOG = logging.getLogger(__name__)
 
 class AnonPlugin:
     def load(self, room, web_app, web_admin):
@@ -23,3 +26,6 @@ class AnonPlugin:
 
     def get_help(self):
         return "/anon <message>\n"
+
+    def get_model(self):
+        return None

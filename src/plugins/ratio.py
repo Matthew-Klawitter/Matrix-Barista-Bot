@@ -27,6 +27,9 @@ class RatioPlugin:
     def get_help(self):
         return "Randomly responds by ratioing the above message"
 
+    def get_model(self):
+        return None
+
     async def message_listener(self, message):
         chance = os.getenv("RATIO_CHANCE")
         if chance is not None:

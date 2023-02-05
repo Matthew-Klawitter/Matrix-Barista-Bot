@@ -17,8 +17,6 @@ class WikiPlugin:
         pass
 
     async def task(self, message):
-
-
         if (message.command == "wiki"):
             await message.bridge.send_message(message.room_id, text="https://en.wikipedia.org/wiki/{}".format(message.args.replace(" ", "_")))
         elif (message.command == "wikirand"):
@@ -33,6 +31,9 @@ class WikiPlugin:
 
     def get_help(self):
         return "/wiki <term>\n/wikirand\n"
+
+    def get_model(self):
+        return None
 
     def get_random(self):
         try:

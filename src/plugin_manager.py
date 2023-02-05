@@ -1,6 +1,7 @@
 import os
 
 from nio import MatrixRoom, RoomMessageText
+from tortoise import Tortoise, run_async
 
 from api.data_objects import Message
 from plugins.roll import DicePlugin
@@ -32,7 +33,7 @@ PLUGINS = {
 }
 
 class PluginManager:
-    def __init__(self, bridge, default_room, user, web_app, web_admin):
+    def __init__(self, bridge, user):
         self.bridge = bridge
         self.user = user[1:user.index(":")]
         config_plugins = os.getenv("PLUGINS").split(",")
@@ -42,6 +43,22 @@ class PluginManager:
         ]
         self.commands = {}
         self.message_listeners = []
+        self.models = []
+
+    async def load_database(self):
+        # Load all plugin models first
+        for p in self.plugins:
+            if p.get_model() is not None:
+                for model in p.get_model():
+                    self.models.append('plugins.' + model)
+
+        # Build the schema
+        LOG.info("Attempting to create database...")
+        LOG.info(self.models)
+        await self.init_database(self.models)
+        LOG.info("Database initialized!")
+
+    def load_plugins(self, default_room, web_app, web_admin):
         for p in self.plugins:
             LOG.info(f"Loading {p}")
             p.load(default_room, web_app, web_admin)
@@ -60,3 +77,10 @@ class PluginManager:
                     LOG.error(e)
             if message.is_command and message.command in self.commands:
                 await self.commands[message.command](message)
+
+    async def init_database(self, models):
+        await Tortoise.init(
+            db_url='sqlite://db.sqlite3',
+            modules={'models': models}
+        )
+        await Tortoise.generate_schemas()

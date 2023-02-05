@@ -9,16 +9,14 @@ import requests
 from typing import Optional, Any, Coroutine, Callable, Tuple
 
 from aiohttp import web
-from aiohttp import web
 from nio import (AsyncClient, ClientConfig, DevicesError, Event, InviteEvent, LoginResponse,
                  LocalProtocolError, MatrixRoom, MatrixUser, RoomMessageText,
                  crypto, exceptions, RoomSendResponse)
 
-from tortoise import Tortoise, run_async
-
 from api.bridge import APIBridge
 from plugin_manager import PluginManager
 from services.mumble_log import MumbleAlerts
+
 
 LOG = logging.getLogger(__name__)
 
@@ -55,21 +53,6 @@ async def get_client():
     client = await load_credentials()
     client.load_store()
     return client
-
-
-async def init_database():
-    username = os.getenv("POSTGRES_USER")
-    password = os.getenv("POSTGRES_PASSWORD")
-    database = os.getenv("POSTGRES_DB")
-    connection_string = "postgres://{username}:{password}@postgres:5432/{database}".format(username=username,
-                                                                                           password=password,
-                                                                                           database=database)
-
-    await Tortoise.init(
-        db_url=connection_string,
-        modules={'models': ['models.models']}
-    )
-    await Tortoise.generate_schemas()
 
 
 class CustomEncryptedClient(AsyncClient):
@@ -144,18 +127,17 @@ async def check_token(token: str):
 
 async def main():
     try:
-        #LOG.info("Attempting to connect to database...")
-        #await init_database()
         web_app = web.Application(client_max_size=int(os.getenv("WEB_CLIENT_MAX_SIZE")))
         web_admin = web.Application(client_max_size=int(os.getenv("WEB_CLIENT_MAX_SIZE")),
                                     middlewares=[token_auth_middleware()])
         LOG.info("Created web app")
-        #LOG.info("Connected to database.")
         client = await(get_client())
         LOG.info("Got client")
         bridge = APIBridge(client)
         LOG.info("Created Bridge")
-        plugin_manager = PluginManager(bridge, client.default_room, client.user, web_app, web_admin)
+        plugin_manager = PluginManager(bridge, client.user)
+        await plugin_manager.load_database()
+        plugin_manager.load_plugins(client.default_room, web_app, web_admin)
         LOG.info("Created PluginManager")
         client.add_event_callback(plugin_manager.message_callback, RoomMessageText)
         LOG.info("Starting services...")

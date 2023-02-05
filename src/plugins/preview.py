@@ -26,6 +26,9 @@ class PreviewPlugin:
     def get_help(self):
         return "Sends a preview of a link\n"
 
+    def get_model(self):
+        return None
+
     async def message_listener(self, message):
         urls = re.findall(r'(https?://\S+)', message.message)
         for url in urls:

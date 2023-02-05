@@ -27,6 +27,9 @@ class CelebratePlugin:
     def get_help(self):
         return "Sends a fireworks\n"
 
+    def get_model(self):
+        return None
+
     async def message_listener(self, message):
         if (re.search(r'\bwow\b', message.message, flags=re.IGNORECASE) or
                 re.search(r'\bnice\b', message.message, flags=re.IGNORECASE) or
