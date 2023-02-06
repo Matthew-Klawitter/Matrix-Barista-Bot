@@ -18,9 +18,6 @@ class PinPlugin:
     def get_help(self):
         return "/pin or /pins"
 
-    def get_model(self):
-        return None
-
     async def pin(self, message):
         if message.is_reply:
             with shelve.open("/data/pins", writeback=True) as data:

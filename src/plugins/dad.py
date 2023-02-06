@@ -17,9 +17,6 @@ class DadPlugin:
     def get_help(self):
         return "Responds to instances of 'I'm'\n"
 
-    def get_model(self):
-        return None
-
     async def message_listener(self, message):
         msg = message.message.lower()
         if msg.startswith("i'm ") or msg.startswith("im "):

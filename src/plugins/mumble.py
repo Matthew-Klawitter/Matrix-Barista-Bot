@@ -71,9 +71,6 @@ class MumblePlugin:
     def get_help(self):
         return "!clip to save a mumble clip"
 
-    def get_model(self):
-        return None
-
     async def clip(self, message):
         clipped_names = self.audio_file.close(message.args)
         for clipped_name in clipped_names:

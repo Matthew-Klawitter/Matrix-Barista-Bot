@@ -86,9 +86,6 @@ class SocialCreditPlugin:
     def get_help(self):
         return "Please ignore"
 
-    def get_model(self):
-        return None
-
     async def get_credit(self, message):
         for k, v in self.credit.items():
             txt = f"{v['title']} {k}, {v['score']}"

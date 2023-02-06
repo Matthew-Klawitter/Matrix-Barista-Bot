@@ -26,6 +26,3 @@ class AnonPlugin:
 
     def get_help(self):
         return "/anon <message>\n"
-
-    def get_model(self):
-        return None

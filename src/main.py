@@ -16,7 +16,7 @@ from nio import (AsyncClient, ClientConfig, DevicesError, Event, InviteEvent, Lo
 from api.bridge import APIBridge
 from plugin_manager import PluginManager
 from services.mumble_log import MumbleAlerts
-
+from database import init_db
 
 LOG = logging.getLogger(__name__)
 
@@ -135,8 +135,9 @@ async def main():
         LOG.info("Got client")
         bridge = APIBridge(client)
         LOG.info("Created Bridge")
+        await init_db()
+        LOG.info("Connected to database")
         plugin_manager = PluginManager(bridge, client.user)
-        await plugin_manager.load_database()
         plugin_manager.load_plugins(client.default_room, web_app, web_admin)
         LOG.info("Created PluginManager")
         client.add_event_callback(plugin_manager.message_callback, RoomMessageText)

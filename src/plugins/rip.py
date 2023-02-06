@@ -18,9 +18,6 @@ class RipPlugin:
     def get_help(self):
         return "Responds to messages with 'rip'\n"
 
-    def get_model(self):
-        return None
-
     async def message_listener(self, message):
         msg = message.message.lower()
         if re.search(r"\brip\b", msg):

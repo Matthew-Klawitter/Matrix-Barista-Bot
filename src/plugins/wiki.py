@@ -32,9 +32,6 @@ class WikiPlugin:
     def get_help(self):
         return "/wiki <term>\n/wikirand\n"
 
-    def get_model(self):
-        return None
-
     def get_random(self):
         try:
             response = requests.get("https://en.wikipedia.org/wiki/Special:Random")

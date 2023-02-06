@@ -24,9 +24,6 @@ class DicePlugin:
     def get_help(self):
         return "/roll <dice_expression>\n"
 
-    def get_model(self):
-        return None
-
     def roll_dice(self, message):
         rolls = []
         constant = []
