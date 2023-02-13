@@ -1,5 +1,17 @@
 import logging
 import shelve
+import nltk
+nltk.download('punkt')
+nltk.download("stopwords")
+nltk.download('averaged_perceptron_tagger')
+nltk.download("vader_lexicon")
+nltk.download('crubadan')
+nltk.download('bcp47')
+nltk.download('words')
+
+from nltk.sentiment import SentimentIntensityAnalyzer
+from nltk.tokenize import SyllableTokenizer
+from nltk import word_tokenize
 
 from aiohttp import web
 
@@ -62,7 +74,43 @@ class SocialCreditPlugin:
                 "reason": "soundclip contribution",
             })
 
+        base_score = 1
 
+        try:
+            tokens = nltk.word_tokenize(msg)
+            pos_tags = nltk.pos_tag(tokens)
+
+            # Check for cheating by posting bad messages
+            has_verb = any(t for t in pos_tags if t[1].startswith("VB"))
+            has_noun = any(t for t in pos_tags if t[1].startswith("NN"))
+            if not has_verb and not has_noun:
+                changes.append({
+                    "score": -5,
+                    "reason": "no noun nor verb",
+                })
+
+            # Base score
+            sia = SentimentIntensityAnalyzer()
+            scores = sia.polarity_scores(msg)
+            multi = (scores["neu"] + scores["pos"] - scores["neg"]*2)
+            base_score = (len(tokens)/4) * multi
+            if scores["neg"]*2 > scores["pos"]:
+                print("negative sentiment")
+                changes.append({
+                    "score": base_score,
+                    "reason": "message is bad for morale",
+                })
+
+            SSP = SyllableTokenizer()
+            longest = max(((s, len(SSP.tokenize(s))) for s in tokens), key=lambda x:x[1])
+            if longest[1] > 3:
+                changes.append({
+                    "score": longest[1],
+                    "reason": f"good use of the word {longest[0]}",
+                })
+        except:
+            # No NLTK analysis
+            LOG.error("Error with NLTK analysis, ignoring")
 
         with shelve.open("/data/credit", writeback=True) as data:
             self.credit = data["credit"]
@@ -74,7 +122,7 @@ class SocialCreditPlugin:
                 for change in changes:
                     self.credit[message.username]["score"] += change["score"]
             else:
-                self.credit[message.username]["score"] += 1
+                self.credit[message.username]["score"] += base_score
             data.sync()
 
     def get_commands(self):
