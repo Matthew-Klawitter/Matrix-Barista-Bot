@@ -1,4 +1,5 @@
 import logging
+import random
 import shelve
 import nltk
 nltk.download('punkt')
@@ -11,9 +12,7 @@ nltk.download('words')
 
 from nltk.sentiment import SentimentIntensityAnalyzer
 from nltk.tokenize import SyllableTokenizer
-from nltk import word_tokenize
 
-from aiohttp import web
 
 LOG = logging.getLogger(__name__)
 
@@ -73,6 +72,16 @@ class SocialCreditPlugin:
                 "score": 4,
                 "reason": "soundclip contribution",
             })
+        if "jerma" in msg:
+            changes.append({
+                "score": 10,
+                "reason": random.choice([
+                    "welcome to jerma craft",
+                    "OH LOOK IT'S A SHPEE",
+                    "AA EE OO! AudioJungle",
+                    "I'm not tiny, I'm compact",
+                ]),
+            })
 
         base_score = 1
 
@@ -103,7 +112,7 @@ class SocialCreditPlugin:
 
             SSP = SyllableTokenizer()
             longest = max(((s, len(SSP.tokenize(s))) for s in tokens), key=lambda x:x[1])
-            if longest[1] > 3:
+            if longest[1] > 4 and "http" not in longest[0]:
                 changes.append({
                     "score": longest[1],
                     "reason": f"good use of the word {longest[0]}",
@@ -117,7 +126,7 @@ class SocialCreditPlugin:
             if changes:
                 await message.bridge.send_message(message.room_id,
                     text="\n".join(
-                        [f'{x["score"]}: {x["reason"]}' for x in changes]
+                        [f'{x["score"]:.2f}: {x["reason"]}' for x in changes]
                     ))
                 for change in changes:
                     self.credit[message.username]["score"] += change["score"]
