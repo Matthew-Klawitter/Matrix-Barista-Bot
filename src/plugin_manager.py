@@ -14,6 +14,7 @@ from plugins.ratio import RatioPlugin
 from plugins.rip import RipPlugin
 from plugins.pin import PinPlugin
 from plugins.social_credit import SocialCreditPlugin
+from plugins.gpt import GPTPlugin
 
 import logging
 
@@ -30,6 +31,7 @@ PLUGINS = {
     "Rip": RipPlugin,
     "Pin": PinPlugin,
     "SocialCredit": SocialCreditPlugin,
+    "GPT": GPTPlugin,
 }
 
 class PluginManager:
