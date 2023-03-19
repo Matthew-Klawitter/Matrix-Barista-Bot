@@ -15,7 +15,7 @@ class WeatherPlugin(BasePlugin):
 
     def load(self, room, web_app, web_admin):
         self.nlp = en_core_web_sm.load()
-        self.api_key = "4f6fe2f5bc5c10adab4f2799484b0fbd"
+        self.api_key = ""
 
     def unload(self):
         pass
