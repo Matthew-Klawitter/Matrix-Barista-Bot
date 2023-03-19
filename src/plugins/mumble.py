@@ -10,9 +10,12 @@ from aiohttp import web
 from pymumble_py3 import Mumble
 from pymumble_py3.callbacks import PYMUMBLE_CLBK_SOUNDRECEIVED as PCS
 
+from plugins.base_plugin import BasePlugin
+
 LOG = logging.getLogger(__name__)
 
-class MumblePlugin:
+
+class MumblePlugin(BasePlugin):
 
     def load(self, room, web_app, web_admin):
         pwd = os.getenv("MUMBLE_PASS")
@@ -39,6 +42,15 @@ class MumblePlugin:
         web_app.router.add_get("/plugins/mumble/file", self.file_route)
         web_app.router.add_get("/plugins/mumble/submit", self.submit_clip_route)
 
+    def unload(self):
+        pass
+
+    def periodic_task(self):
+        pass
+
+    async def message_listener(self, message):
+        pass
+
     def setup_routes(self, web_admin):
         web_admin.router.add_get("/plugins/mumble/connected", self.connected_users)
         web_admin.router.add_get("/plugins/mumble/users", self.get_users)
@@ -55,7 +67,8 @@ class MumblePlugin:
         file = f'/tmp/{request.query["path"]}'
         name = request.query["name"]
         duration = mx - mn
-        subprocess.run(["ffmpeg", "-i", file, "-ss", str(mn), "-t", str(duration), "-acodec", "copy", f"/out/{name}.wav"])
+        subprocess.run(
+            ["ffmpeg", "-i", file, "-ss", str(mn), "-t", str(duration), "-acodec", "copy", f"/out/{name}.wav"])
         return web.json_response({})
 
     def create_audio_file(self):
@@ -122,7 +135,7 @@ class AudioFile():
                 continue
             file_obj.close()
 
-            start_frame = max(0, file_obj.getnframes() - AudioFile.SECONDS*AudioFile.BITRATE)
+            start_frame = max(0, file_obj.getnframes() - AudioFile.SECONDS * AudioFile.BITRATE)
 
             read_obj = wave.open(self.get_name(name), "rb")
             read_obj.setpos(start_frame)
@@ -140,4 +153,3 @@ class AudioFile():
 
     def is_similar(self, username, mumble_name, ratio):
         return difflib.SequenceMatcher(None, username, mumble_name).ratio() > ratio
-

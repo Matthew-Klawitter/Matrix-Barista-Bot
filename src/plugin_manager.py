@@ -4,43 +4,18 @@ from nio import MatrixRoom, RoomMessageText
 from tortoise import Tortoise, run_async
 
 from api.data_objects import Message
-from plugins.roll import DicePlugin
-from plugins.preview import PreviewPlugin
-from plugins.celebrate import CelebratePlugin
-from plugins.dad import DadPlugin
-from plugins.wiki import WikiPlugin
-from plugins.mumble import MumblePlugin
-from plugins.ratio import RatioPlugin
-from plugins.rip import RipPlugin
-from plugins.pin import PinPlugin
-from plugins.social_credit import SocialCreditPlugin
+from plugins.plugin_loader import PluginLoader
 
 import logging
 
 LOG = logging.getLogger(__name__)
 
-PLUGINS = {
-    "Celebrate": CelebratePlugin,
-    "Dad": DadPlugin,
-    "Clippy": MumblePlugin,
-    "Preview": PreviewPlugin,
-    "Roll": DicePlugin,
-    "Wiki": WikiPlugin,
-    "Ratio": RatioPlugin,
-    "Rip": RipPlugin,
-    "Pin": PinPlugin,
-    "SocialCredit": SocialCreditPlugin,
-}
-
 class PluginManager:
     def __init__(self, bridge, user):
         self.bridge = bridge
         self.user = user[1:user.index(":")]
-        config_plugins = os.getenv("PLUGINS").split(",")
-        self.plugins = [
-            PLUGINS[name]() for name in config_plugins
-            if name in PLUGINS
-        ]
+        self.loader = PluginLoader()
+        self.plugins = self.loader.plugins
         self.commands = {}
         self.message_listeners = []
 

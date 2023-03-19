@@ -1,11 +1,22 @@
 import logging
 
 from aiohttp import web
+from plugins.base_plugin import BasePlugin
+
 
 LOG = logging.getLogger(__name__)
 
-class DadPlugin:
+class DadPlugin(BasePlugin):
     def load(self, room, web_app, web_admin):
+        pass
+
+    def unload(self):
+        pass
+
+    async def periodic_task(self):
+        pass
+
+    def message_listener(self, message):
         pass
 
     def get_commands(self):

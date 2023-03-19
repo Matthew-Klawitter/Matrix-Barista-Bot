@@ -8,13 +8,24 @@ nltk.download('stopwords')
 import requests
 from aiohttp import web
 from lxml.html import fromstring
+from plugins.base_plugin import BasePlugin
 
 import logging
 
 LOG = logging.getLogger(__name__)
 
-class PreviewPlugin:
+
+class PreviewPlugin(BasePlugin):
     def load(self, room, web_app, web_admin):
+        pass
+
+    def unload(self):
+        pass
+
+    async def periodic_task(self):
+        pass
+
+    async def message_listener(self, message):
         pass
 
     def get_commands(self):

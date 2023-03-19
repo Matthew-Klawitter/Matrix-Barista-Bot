@@ -2,10 +2,13 @@ import logging
 import shelve
 
 from aiohttp import web
+from plugins.base_plugin import BasePlugin
+
 
 LOG = logging.getLogger(__name__)
 
-class SocialCreditPlugin:
+
+class SocialCreditPlugin(BasePlugin):
     def load(self, room, web_app, web_admin):
         with shelve.open("/data/credit", writeback=True) as data:
             if "credit" not in data:
@@ -21,6 +24,29 @@ class SocialCreditPlugin:
             {"threshold": 500, "title": "Loyalist"},
         ]
 
+    def unload(self):
+        pass
+
+    async def periodic_task(self):
+        pass
+
+    async def message_listener(self, message):
+        await self.rate_message(message)
+
+        title = self.credit[message.username]["title"]
+        score = self.credit[message.username]["score"]
+        for i in range(len(self.titles)-1):
+            t = self.titles[i]
+            nt = self.titles[i+1]
+            if t["threshold"] < score and nt["threshold"] >= score and \
+                    t["title"] != title:
+                with shelve.open("/data/credit", writeback=True) as data:
+                    self.credit = data["credit"]
+                    self.credit[message.username]["title"] = t["title"]
+                    txt = f"{message.username} is now known as '{t['title']}'"
+                    await message.bridge.send_message(message.room_id, text=txt)
+                    data.sync()
+
     def add_user(self, username):
         with shelve.open("/data/credit", writeback=True) as data:
             self.credit = data["credit"]
@@ -29,6 +55,15 @@ class SocialCreditPlugin:
                 "title": "Untrustworthy",
             }
             data.sync()
+
+    def get_commands(self):
+        return {"credit": self.get_credit}
+
+    def get_name(self):
+        return "Social Credit Monitor"
+
+    def get_help(self):
+        return "Please ignore"
 
     async def rate_message(self, message):
         if message.username not in self.credit:
@@ -62,8 +97,6 @@ class SocialCreditPlugin:
                 "reason": "soundclip contribution",
             })
 
-
-
         with shelve.open("/data/credit", writeback=True) as data:
             self.credit = data["credit"]
             if changes:
@@ -77,33 +110,7 @@ class SocialCreditPlugin:
                 self.credit[message.username]["score"] += 1
             data.sync()
 
-    def get_commands(self):
-        return {"credit": self.get_credit}
-
-    def get_name(self):
-        return "Social Credit Monitor"
-
-    def get_help(self):
-        return "Please ignore"
-
     async def get_credit(self, message):
         for k, v in self.credit.items():
             txt = f"{v['title']} {k}, {v['score']}"
             await message.bridge.send_message(message.room_id, text=txt)
-
-    async def message_listener(self, message):
-        await self.rate_message(message)
-
-        title = self.credit[message.username]["title"]
-        score = self.credit[message.username]["score"]
-        for i in range(len(self.titles)-1):
-            t = self.titles[i]
-            nt = self.titles[i+1]
-            if t["threshold"] < score and nt["threshold"] >= score and \
-                    t["title"] != title:
-                with shelve.open("/data/credit", writeback=True) as data:
-                    self.credit = data["credit"]
-                    self.credit[message.username]["title"] = t["title"]
-                    txt = f"{message.username} is now known as '{t['title']}'"
-                    await message.bridge.send_message(message.room_id, text=txt)
-                    data.sync()

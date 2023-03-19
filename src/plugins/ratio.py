@@ -4,28 +4,23 @@ import random
 
 from aiohttp import web
 
+from plugins.base_plugin import BasePlugin
+
 LOG = logging.getLogger(__name__)
 
 
-class RatioPlugin:
+class RatioPlugin(BasePlugin):
     def __init__(self):
         self.should_ratio = False
 
     def load(self, room, web_app, web_admin):
         web_admin.router.add_post("/plugins/ratio/trigger_next", self.trigger_next)
 
-    async def trigger_next(self, request):
-        self.should_ratio = True
-        return web.Response(text='ok', content_type="text/html")
+    def unload(self):
+        pass
 
-    def get_commands(self):
-        return {}
-
-    def get_name(self):
-        return "Ratio"
-
-    def get_help(self):
-        return "Randomly responds by ratioing the above message"
+    async def periodic_task(self):
+        pass
 
     async def message_listener(self, message):
         chance = os.getenv("RATIO_CHANCE")
@@ -42,6 +37,19 @@ class RatioPlugin:
                     await message.bridge.send_message(message.room_id, text=ratio)
             except TypeError:
                 pass
+
+    def get_commands(self):
+        return {}
+
+    def get_name(self):
+        return "Ratio"
+
+    def get_help(self):
+        return "Randomly responds by ratioing the above message"
+
+    async def trigger_next(self, request):
+        self.should_ratio = True
+        return web.Response(text='ok', content_type="text/html")
 
     def get_ratio(self):
         # Current data used for ratio generation

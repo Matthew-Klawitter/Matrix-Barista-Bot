@@ -1,13 +1,26 @@
 import os
 from pathlib import Path
 from api.data_objects import Message
+
+from plugins.base_plugin import BasePlugin
+
 import shelve
 
-class PinPlugin:
+
+class PinPlugin(BasePlugin):
     def load(self, room, web_app, web_admin):
         with shelve.open("/data/pins", writeback=True) as data:
             if "pins" not in data:
                 data["pins"] = []
+
+    def unload(self):
+        pass
+
+    async def periodic_task(self):
+        pass
+
+    async def message_listener(self, message):
+        pass
 
     def get_commands(self):
         return {"pin": self.pin, "pins": self.pins}

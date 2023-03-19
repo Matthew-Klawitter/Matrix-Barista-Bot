@@ -2,18 +2,25 @@ import random
 import re
 
 from aiohttp import web
+from plugins.base_plugin import BasePlugin
 
 """
 Main Plugin class that manages command usage
 """
 
 
-class DicePlugin:
+class DicePlugin(BasePlugin):
     def load(self, room, web_app, web_admin):
         pass
 
-    async def task(self, message):
-        await message.bridge.send_message(message.room_id, text=self.roll_dice(message))
+    def unload(self):
+        pass
+
+    async def periodic_task(self):
+        pass
+
+    async def message_listener(self, message):
+        pass
 
     def get_commands(self):
         return {"r": self.task, "roll": self.task}
@@ -23,6 +30,9 @@ class DicePlugin:
 
     def get_help(self):
         return "/roll <dice_expression>\n"
+
+    async def task(self, message):
+        await message.bridge.send_message(message.room_id, text=self.roll_dice(message))
 
     def roll_dice(self, message):
         rolls = []

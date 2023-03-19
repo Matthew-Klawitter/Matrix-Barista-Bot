@@ -2,6 +2,8 @@ import random
 import re
 
 from aiohttp import web
+from plugins.base_plugin import BasePlugin
+
 
 """
 Main Plugin class that manages command usage
@@ -10,9 +12,18 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
-class AnonPlugin:
+class AnonPlugin(BasePlugin):
     def load(self, room, web_app, web_admin):
         self.room = room
+
+    def unload(self):
+        pass
+
+    async def periodic_task(self):
+        pass
+
+    async def message_listener(self, message):
+        pass
 
     async def task(self, message):
         text=f"Message from Anonymous: {message.args}"

@@ -2,21 +2,21 @@ import logging
 import re, os, random
 
 from aiohttp import web
+from plugins.base_plugin import BasePlugin
+
 
 LOG = logging.getLogger(__name__)
 
-class RipPlugin:
+
+class RipPlugin(BasePlugin):
     def load(self, room, web_app, web_admin):
         pass
 
-    def get_commands(self):
-        return {}
+    def unload(self):
+        pass
 
-    def get_name(self):
-        return "Rip"
-
-    def get_help(self):
-        return "Responds to messages with 'rip'\n"
+    async def periodic_task(self):
+        pass
 
     async def message_listener(self, message):
         msg = message.message.lower()
@@ -27,3 +27,12 @@ class RipPlugin:
                 await message.bridge.send_image(message.room_id, filename)
             except:
                 pass
+
+    def get_commands(self):
+        return {}
+
+    def get_name(self):
+        return "Rip"
+
+    def get_help(self):
+        return "Responds to messages with 'rip'\n"
