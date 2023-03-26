@@ -15,6 +15,7 @@ from plugins.rip import RipPlugin
 from plugins.pin import PinPlugin
 from plugins.social_credit import SocialCreditPlugin
 from plugins.gpt import GPTPlugin
+from plugins.chat import ChatPlugin
 
 import logging
 
@@ -32,6 +33,7 @@ PLUGINS = {
     "Pin": PinPlugin,
     "SocialCredit": SocialCreditPlugin,
     "GPT": GPTPlugin,
+    "Chat": ChatPlugin,
 }
 
 class PluginManager:
