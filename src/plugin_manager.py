@@ -1,3 +1,4 @@
+import asyncio
 import os
 
 from nio import MatrixRoom, RoomMessageText
@@ -18,6 +19,8 @@ class PluginManager:
         self.plugins = self.loader.plugins
         self.commands = {}
         self.message_listeners = []
+        self.should_process_periodically = True
+        self.periodic_timeout = 1
 
     def load_plugins(self, default_room, web_app, web_admin):
         for p in self.plugins:
@@ -38,3 +41,12 @@ class PluginManager:
                     LOG.error(e)
             if message.is_command and message.command in self.commands:
                 await self.commands[message.command](message)
+
+    async def initialize_loop(self):
+        asyncio.create_task(self.periodic_loop())
+
+    async def periodic_loop(self):
+        while self.should_process_periodically:
+            for plugin in self.plugins:
+                await plugin.periodic_task()
+            await asyncio.sleep(self.periodic_timeout)

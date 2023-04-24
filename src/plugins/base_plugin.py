@@ -35,10 +35,15 @@ class BasePlugin(ABC):
         pass
 
     @abstractmethod
-    async def periodic_task(self):
+    async def periodic_task(self, bridge):
         """
         Method called periodically based on the applications global timeout.
         See also the main.py periodic method
+
+        Parameters
+        ----------
+        bridge : ApiBridge
+            Helper class to send responses back to the chatroom
         """
         pass
 

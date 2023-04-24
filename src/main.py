@@ -1,21 +1,16 @@
 import asyncio
 import os
-import sys
-import json
-import getpass
 import logging
-import requests
 
-from typing import Optional, Any, Coroutine, Callable, Tuple
+from typing import Coroutine, Tuple
 
 from aiohttp import web
-from nio import (AsyncClient, ClientConfig, DevicesError, Event, InviteEvent, LoginResponse,
-                 LocalProtocolError, MatrixRoom, MatrixUser, RoomMessageText,
-                 crypto, exceptions, RoomSendResponse)
+from nio import (AsyncClient, ClientConfig, LoginResponse,
+                 RoomMessageText)
 
 from api.bridge import APIBridge
 from plugin_manager import PluginManager
-from services.mumble_log import MumbleAlerts
+from src.plugins.mumble_log import MumbleAlerts
 from database import init_db
 
 LOG = logging.getLogger(__name__)
@@ -90,13 +85,6 @@ async def run_client(client: CustomEncryptedClient) -> None:
     )
 
 
-async def periodic(services, timeout):
-    while True:
-        for s in services:
-            await s.task()
-        await asyncio.sleep(timeout)
-
-
 def token_auth_middleware(auth_scheme: str = 'Token', exclude_routes: Tuple = tuple(),
                           exclude_methods: Tuple = tuple()) -> Coroutine:
     """
@@ -142,8 +130,7 @@ async def main():
         LOG.info("Created PluginManager")
         client.add_event_callback(plugin_manager.message_callback, RoomMessageText)
         LOG.info("Starting services...")
-        services = [MumbleAlerts(bridge, client.default_room)]
-        periodic_loop = asyncio.create_task(periodic(services, 1))
+        await plugin_manager.periodic_loop()
         LOG.info("Finished created services.")
 
         LOG.info("Attempting to start rest services services...")

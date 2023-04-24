@@ -1,3 +1,5 @@
+import os
+
 import requests
 import en_core_web_sm
 import logging
@@ -10,7 +12,7 @@ LOG = logging.getLogger(__name__)
 class WeatherPlugin(BasePlugin):
     def __init__(self):
         super().__init__()
-        self.api_key = None
+        self.api_key = os.getenv("WEATHER_API_KEY")
         self.nlp = None
 
     def load(self, room, web_app, web_admin):
@@ -20,7 +22,7 @@ class WeatherPlugin(BasePlugin):
     def unload(self):
         pass
 
-    async def periodic_task(self):
+    async def periodic_task(self, bridge):
         pass
 
     async def message_listener(self, message):
@@ -43,15 +45,18 @@ class WeatherPlugin(BasePlugin):
                     await message.bridge.send_message(message.room_id, text=txt)
                     return
 
-            city_weather = self.get_weather(city)
-            if city_weather is not None:
-                txt = "In " + city + ", the current weather is: " + city_weather
-                await message.bridge.send_message(message.room_id, text=txt)
-                return
+            if self.api_key is not None and self.api_key != "":
+                city_weather = self.get_weather(city)
+                if city_weather is not None:
+                    txt = "In " + city + ", the current weather is: " + city_weather
+                    await message.bridge.send_message(message.room_id, text=txt)
+                    return
+                else:
+                    txt = "Something went wrong."
+                    await message.bridge.send_message(message.room_id, text=txt)
+                    return
             else:
-                txt = "Something went wrong."
-                await message.bridge.send_message(message.room_id, text=txt)
-                return
+                os.getenv("WEATHER_API_KEY")
 
     def get_commands(self):
         return {}
