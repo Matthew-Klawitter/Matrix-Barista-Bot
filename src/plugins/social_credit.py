@@ -86,48 +86,50 @@ class SocialCreditPlugin:
         base_score = 1
 
         try:
-            tokens = nltk.word_tokenize(msg)
-            pos_tags = nltk.pos_tag(tokens)
+            if "http://" not in msg and "https://" not in msg:
+                tokens = nltk.word_tokenize(msg)
+                pos_tags = nltk.pos_tag(tokens)
 
-            # Check for cheating by posting bad messages
-            has_verb = any(t for t in pos_tags if t[1].startswith("VB"))
-            has_noun = any(t for t in pos_tags if t[1].startswith("NN"))
-            if not has_verb and not has_noun:
-                changes.append({
-                    "score": -5,
-                    "reason": "no noun nor verb",
-                })
+                # Check for cheating by posting bad messages
+                has_verb = any(t for t in pos_tags if t[1].startswith("VB"))
+                has_noun = any(t for t in pos_tags if t[1].startswith("NN"))
+                if not has_verb and not has_noun:
+                    changes.append({
+                        "score": -5,
+                        "reason": "no noun nor verb",
+                    })
 
-            # Base score
-            sia = SentimentIntensityAnalyzer()
-            scores = sia.polarity_scores(msg)
-            multi = (scores["neu"] + scores["pos"] - scores["neg"]*2)
-            base_score = (len(tokens)/4) * multi
-            if scores["neg"]*2 > scores["pos"]:
-                print("negative sentiment")
-                changes.append({
-                    "score": base_score,
-                    "reason": "message is bad for morale",
-                })
+                # Base score
+                sia = SentimentIntensityAnalyzer()
+                scores = sia.polarity_scores(msg)
+                multi = (scores["neu"] + scores["pos"] - scores["neg"]*2)
+                base_score = (len(tokens)/4) * multi
+                if scores["neg"]*2 > scores["pos"]:
+                    print("negative sentiment")
+                    changes.append({
+                        "score": base_score,
+                        "reason": "message is bad for morale",
+                    })
 
-            SSP = SyllableTokenizer()
-            longest = max(((s, len(SSP.tokenize(s))) for s in tokens), key=lambda x:x[1])
-            if longest[1] > 4 and "http" not in longest[0]:
-                changes.append({
-                    "score": longest[1],
-                    "reason": f"good use of the word {longest[0]}",
-                })
+                SSP = SyllableTokenizer()
+                longest = max(((s, len(SSP.tokenize(s))) for s in tokens), key=lambda x:x[1])
+                if longest[1] > 4 and "http" not in longest[0]:
+                    changes.append({
+                        "score": longest[1],
+                        "reason": f"good use of the word {longest[0]}",
+                    })
         except:
             # No NLTK analysis
             LOG.error("Error with NLTK analysis, ignoring")
-
         with shelve.open("/data/credit", writeback=True) as data:
             self.credit = data["credit"]
             if changes:
                 await message.bridge.send_message(message.room_id,
                     text="\n".join(
                         [f'{x["score"]:.2f}: {x["reason"]}' for x in changes]
-                    ))
+                    ),
+                    reply_to=message.event.event_id,
+                )
                 for change in changes:
                     self.credit[message.username]["score"] += change["score"]
             else:

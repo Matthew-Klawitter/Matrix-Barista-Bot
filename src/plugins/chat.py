@@ -1,12 +1,8 @@
-import logging
 import re, os, random
 
 from asyncio import run
 
-LOG = logging.getLogger(__name__)
-
 async def random_file(parent, message):
-    LOG.info("random file...")
     files = os.listdir(parent)
     await message.bridge.send_image(message.room_id, parent + random.choice(files))
 
@@ -42,10 +38,7 @@ class ChatPlugin:
         for pattern, callbacks in responses:
             if re.search(pattern, msg, flags=re.IGNORECASE):
                 try:
-                    LOG.info(callbacks)
                     random_callback = random.choice(callbacks)
                     await random_callback(message)
                 except Exception as e:
-                    LOG.error("Error running callback")
-                    LOG.error(e)
                     pass
