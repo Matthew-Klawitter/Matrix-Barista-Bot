@@ -12,6 +12,7 @@ from plugins.wiki import WikiPlugin
 from plugins.mumble import MumblePlugin
 from plugins.ratio import RatioPlugin
 from plugins.pin import PinPlugin
+from plugins.trivia import TriviaPlugin
 from plugins.social_credit import SocialCreditPlugin
 from plugins.gpt import GPTPlugin
 from plugins.chat import ChatPlugin
@@ -32,6 +33,7 @@ PLUGINS = {
     "SocialCredit": SocialCreditPlugin,
     "GPT": GPTPlugin,
     "Chat": ChatPlugin,
+    "Trivia": TriviaPlugin,
 }
 
 class PluginManager:
