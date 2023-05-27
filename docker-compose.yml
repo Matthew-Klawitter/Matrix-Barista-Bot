@@ -23,6 +23,16 @@ services:
       - .env
 #    depends_on:
 #      - postgres
+  filestash:
+    container_name: filestash
+    image: machines/filestash
+    volumes:
+      - ./res/:/home/filestash
+      - filestash_state:/app/data/state
+    restart: always
+    ports:
+    - "8334:8334"
 volumes:
   src:
   nio_store:
+  filestash_state:
