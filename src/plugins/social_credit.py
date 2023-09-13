@@ -86,7 +86,7 @@ class SocialCreditPlugin:
         base_score = 1
 
         try:
-            if "http://" not in msg and "https://" not in msg:
+            if False and "http://" not in msg and "https://" not in msg:
                 tokens = nltk.word_tokenize(msg)
                 pos_tags = nltk.pos_tag(tokens)
 
