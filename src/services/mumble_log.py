@@ -1,11 +1,7 @@
-import asyncio
 import datetime
 import os
-import socket
-from struct import pack, unpack
-from time import sleep
+import shelve
 
-import datetime
 import re
 import logging
 
@@ -17,6 +13,12 @@ class MumbleAlerts:
         self.room = room
         self.last_update = None
         self.pattern = re.compile(r"...(\d.+ .+) 1 => <.+:(.+)\(.+\).+")
+        self.map = {}
+        with open("/res/mumble_map.txt") as f:
+            for line in f.readlines():
+                parts = line.split(" ")
+                self.map[parts[0]] = parts[1]
+        self.current_mumble_users = set()
 
     async def task(self):
         try:
@@ -35,11 +37,16 @@ class MumbleAlerts:
                                     name = m[2]
                                     if "Authenticated" in line:
                                         action = "connected to"
+                                        if name in self.map:
+                                            self.current_mumble_users.add(name)
+                                        if len(self.current_mumble_users) == 1:
+                                            await self.give_credit(name)
                                     elif "Connection closed" in line:
                                         action = "disconnected from"
                                     else:
                                         continue
                                     await self.bridge.send_message(self.room, text=f"{name} {action} mumble.")
+
         except FileNotFoundError:
             pass
         except Exception as e:
@@ -49,3 +56,9 @@ class MumbleAlerts:
         f = "%Y-%m-%d %H:%M:%S.%f"
         return datetime.datetime.strptime(stng, f)
 
+    async def give_credit(self, mumble_username):
+        username = self.map[mumble_username]
+        with shelve.open("/data/credit", writeback=True) as data:
+            self.credit = data["credit"]
+            self.credit[username]["score"] += 30
+            await self.bridge.send_message(self.room, text=f"+30 points to {username} for first on mumble")
