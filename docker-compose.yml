@@ -16,13 +16,15 @@ services:
       - ./src/:/src
       - ./res/:/res
       - ./data/:/data
+      - /home/matt/Bots/MumbleMusicBot/botamusique/music/bot/:/out
       - /var/log/mumble-server/mumble-server.log:/var/log/mumble-server/mumble-server.log
     ports:
-      - 8008:8008
+      - 3000:3000
     env_file:
       - .env
 #    depends_on:
 #      - postgres
+    restart: always
   filestash:
     container_name: filestash
     image: machines/filestash

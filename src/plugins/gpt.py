@@ -17,6 +17,7 @@ class GPTPlugin:
         return {
             "gpt": self.chat_completion,
             "prompt": self.use_prompt,
+            "prompt_show": self.show_prompt,
             "prompt_list": self.list_prompts,
             "prompts": self.list_prompts,
             "prompt_save": self.save_prompt,
@@ -47,7 +48,15 @@ class GPTPlugin:
         name, prompt = message.args.split(" ", 1)
         if name in self.prompts:
             text = await self.get_completion(self.prompts[name] + prompt)
-            await message.bridge.send_message(message.room_id, text=text)
+            await message.bridge.send_message(message.room_id, text=text, reply_to=message.event.event_id)
+        else:
+            await message.bridge.send_message(message.room_id, text=f"No such prompt '{name}'")
+
+    async def show_prompt(self, message):
+        name = message.args
+        if name in self.prompts:
+            text = self.prompts[name]
+            await message.bridge.send_message(message.room_id, text=text, reply_to=message.event.event_id)
         else:
             await message.bridge.send_message(message.room_id, text=f"No such prompt '{name}'")
 
@@ -58,12 +67,18 @@ class GPTPlugin:
                 messages=[
                     {"role": "user", "content": text},
                 ],
-                max_tokens=600,
+                max_tokens=1000,
             )
             res_text = " ".join([choice["message"]["content"].strip() for choice in response["choices"]])
             return res_text
         except Exception as e:
             return f"API issue {e}"
+
+    def message_content(self, message):
+        if message.is_reply:
+            # Remove the username from the message
+            return message.replied_message.split(' ', 1)[1]
+        return message.args
 
     async def chat_completion(self, message):
         if message.is_reply:
@@ -87,3 +102,4 @@ class GPTPlugin:
         except Exception:
             await message.bridge.send_message(
                 message.room_id, text="Sorry, API error")
+

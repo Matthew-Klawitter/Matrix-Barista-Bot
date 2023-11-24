@@ -36,13 +36,13 @@
     min.value = 0
     max.value = duration
     min.addEventListener('change', (event) => {
-        if(event.target.value > max.value){
-            min.value = max.value
+        if(parseInt(event.target.value) > parseInt(max.value)){
+            min.value = parseInt(max.value)
         }
     })
     max.addEventListener('change', (event) => {
-        if(event.target.value < min.value){
-            max.value = min.value
+        if(parseInt(event.target.value) < parseInt(min.value)){
+            max.value = parseInt(min.value)
         }
     })
 

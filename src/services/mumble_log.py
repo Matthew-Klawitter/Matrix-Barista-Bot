@@ -16,7 +16,7 @@ class MumbleAlerts:
         self.map = {}
         with open("/res/mumble_map.txt") as f:
             for line in f.readlines():
-                parts = line.split(" ")
+                parts = line.strip().split(" ")
                 self.map[parts[0]] = parts[1]
         self.current_mumble_users = set()
 
