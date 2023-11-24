@@ -1,7 +1,6 @@
 import asyncio
-import os
 import logging
-
+import os
 from typing import Coroutine, Tuple
 
 from aiohttp import web
@@ -9,9 +8,8 @@ from nio import (AsyncClient, ClientConfig, LoginResponse,
                  RoomMessageText)
 
 from api.bridge import APIBridge
-from plugin_manager import PluginManager
-from src.plugins.mumble_log import MumbleAlerts
 from database import init_db
+from plugin_manager import PluginManager
 
 LOG = logging.getLogger(__name__)
 
@@ -130,7 +128,7 @@ async def main():
         LOG.info("Created PluginManager")
         client.add_event_callback(plugin_manager.message_callback, RoomMessageText)
         LOG.info("Starting services...")
-        await plugin_manager.periodic_loop()
+        await plugin_manager.initialize_loop()
         LOG.info("Finished created services.")
 
         LOG.info("Attempting to start rest services services...")

@@ -13,7 +13,7 @@ class DadPlugin(BasePlugin):
     def unload(self):
         pass
 
-    async def periodic_task(self):
+    async def periodic_task(self, bridge):
         pass
 
     def message_listener(self, message):

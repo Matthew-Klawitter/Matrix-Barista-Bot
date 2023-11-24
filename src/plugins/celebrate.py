@@ -24,7 +24,7 @@ class CelebratePlugin(BasePlugin):
     def unload(self):
         pass
 
-    async def periodic_task(self):
+    async def periodic_task(self, bridge):
         pass
 
     async def message_listener(self, message):

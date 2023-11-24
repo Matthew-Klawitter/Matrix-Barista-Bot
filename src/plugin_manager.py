@@ -19,28 +19,32 @@ class PluginManager:
         self.plugins = self.loader.plugins
         self.commands = {}
         self.message_listeners = []
+        self.should_process_command = True
+        self.should_process_callback = True
         self.should_process_periodically = True
         self.periodic_timeout = 1
 
     def load_plugins(self, default_room, web_app, web_admin):
-        for p in self.plugins:
-            LOG.info(f"Loading {p}")
-            p.load(default_room, web_app, web_admin)
-            for command, callback in p.get_commands().items():
-                self.commands[command] = callback
-            if hasattr(p, "message_listener"):
-                self.message_listeners.append(p.message_listener)
+        if self.should_process_command:
+            for p in self.plugins:
+                LOG.info(f"Loading {p}")
+                p.load(default_room, web_app, web_admin)
+                for command, callback in p.get_commands().items():
+                    self.commands[command] = callback
+                if hasattr(p, "message_listener"):
+                    self.message_listeners.append(p.message_listener)
 
     async def message_callback(self, room: MatrixRoom, event: RoomMessageText) -> None:
-        message = Message(self.bridge, room, event)
-        if not message.username.lower() == self.user.lower():
-            for listener in self.message_listeners:
-                try:
-                    await listener(message)
-                except Exception as e:
-                    LOG.error(e)
-            if message.is_command and message.command in self.commands:
-                await self.commands[message.command](message)
+        if self.should_process_callback:
+            message = Message(self.bridge, room, event)
+            if not message.username.lower() == self.user.lower():
+                for listener in self.message_listeners:
+                    try:
+                        await listener(message)
+                    except Exception as e:
+                        LOG.error(e)
+                if message.is_command and message.command in self.commands:
+                    await self.commands[message.command](message)
 
     async def initialize_loop(self):
         asyncio.create_task(self.periodic_loop())
@@ -48,5 +52,5 @@ class PluginManager:
     async def periodic_loop(self):
         while self.should_process_periodically:
             for plugin in self.plugins:
-                await plugin.periodic_task()
+                await plugin.periodic_task(self.bridge)
             await asyncio.sleep(self.periodic_timeout)
