@@ -21,6 +21,10 @@ LOG = logging.getLogger(__name__)
 
 
 class SocialCreditPlugin(BasePlugin):
+    def __init__(self):
+        self.titles = None
+        self.credit = None
+
     def load(self, room, web_app, web_admin):
         with shelve.open("/data/credit", writeback=True) as data:
             if "credit" not in data:
