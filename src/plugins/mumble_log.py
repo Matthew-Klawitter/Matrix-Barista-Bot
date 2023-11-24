@@ -1,6 +1,8 @@
 import datetime
 import logging
 import os
+import shelve
+
 import re
 
 LOG = logging.getLogger(__name__)
@@ -10,6 +12,12 @@ class MumbleAlerts:
         self.room = None
         self.last_update = None
         self.pattern = re.compile(r"...(\d.+ .+) 1 => <.+:(.+)\(.+\).+")
+        self.map = {}
+        with open("/res/mumble_map.txt") as f:
+            for line in f.readlines():
+                parts = line.strip().split(" ")
+                self.map[parts[0]] = parts[1]
+        self.current_mumble_users = set()
 
     def load(self, room, web_app, web_admin):
         self.room = room
@@ -35,6 +43,10 @@ class MumbleAlerts:
                                     name = m[2]
                                     if "Authenticated" in line:
                                         action = "connected to"
+                                        if name in self.map:
+                                            self.current_mumble_users.add(name)
+                                        if len(self.current_mumble_users) == 1:
+                                            await self.give_credit(name)
                                     elif "Connection closed" in line:
                                         action = "disconnected from"
                                     else:
@@ -61,3 +73,9 @@ class MumbleAlerts:
         f = "%Y-%m-%d %H:%M:%S.%f"
         return datetime.datetime.strptime(stng, f)
 
+    async def give_credit(self, mumble_username):
+        username = self.map[mumble_username]
+        with shelve.open("/data/credit", writeback=True) as data:
+            self.credit = data["credit"]
+            self.credit[username]["score"] += 30
+            await self.bridge.send_message(self.room, text=f"+30 points to {username} for first on mumble")

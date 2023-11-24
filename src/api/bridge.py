@@ -26,7 +26,7 @@ class APIBridge:
             data.decompose()
         return ' '.join(soup.stripped_strings)
 
-    async def send_message(self, room_id, text=None, html=None, msg_type="m.text"):
+    async def send_message(self, room_id, text=None, html=None, msg_type="m.text", reply_to=None):
         content = {}
         if html:
             html = self.limit_message(html)
@@ -37,6 +37,12 @@ class APIBridge:
             text = self.limit_message(text)
         content["msgtype"] = msg_type
         content["body"] = text
+        if reply_to:
+            content["m.relates_to"] = {
+                "rel_type": "m.thread",
+                "event_id": reply_to,
+                "is_falling_back": False, # don't show to user outside of thread
+            }
         try:
             await self.client.room_send(
                 room_id=room_id,

@@ -5,6 +5,7 @@ class Message:
         self.room_name = room.display_name
         self.bridge = bridge
         self.message = event.body
+        self.event = event
 
         try:
             # Check for reply
