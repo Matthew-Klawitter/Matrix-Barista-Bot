@@ -50,16 +50,8 @@ async def send_ai_meme(message, prompt):
     )
     urllib.request.urlretrieve(image["data"][0]["url"], "/tmp/gpt_image.jpg")
 
-
-    img = Image.open("/tmp/gpt_image.jpg")
-    font = ImageFont.truetype("/res/COMIC.TTF", 48)
-    draw = ImageDraw.Draw(img)
-    for i, line in enumerate(textwrap.wrap(j["caption"], width=20)):
-        draw.text((0, 50*i), line, fill='white',
-                  font=font, stroke_width=2, stroke_fill='black')
-
-    img.save("/res/out.jpg")
-    await message.bridge.send_image(message.room_id, "/res/out.jpg")
+    await message.bridge.send_message(message.room_id, text=j["caption"])
+    await message.bridge.send_image(message.room_id, "/tmp/gpt_image.jpg")
 
 responses = (
     ( r"\brip\b", [random_rip] ),
